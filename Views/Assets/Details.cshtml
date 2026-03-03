@@ -1,0 +1,51 @@
+@model AssetTracker.Models.Asset
+
+@{
+    ViewData["Title"] = "Asset Details";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h1 class="h4 mb-0">Asset Details</h1>
+        <div class="d-flex gap-2">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Edit</a>
+            }
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back to List</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Asset Tag</dt>
+            <dd class="col-sm-9">@Model.AssetTag</dd>
+
+            <dt class="col-sm-3">Asset Type</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(m => m.AssetType)</dd>
+
+            <dt class="col-sm-3">Brand</dt>
+            <dd class="col-sm-9">@Model.Brand</dd>
+
+            <dt class="col-sm-3">Model</dt>
+            <dd class="col-sm-9">@Model.Model</dd>
+
+            <dt class="col-sm-3">Serial Number</dt>
+            <dd class="col-sm-9">@Model.SerialNumber</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@Model.Status</dd>
+
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">@Model.Location</dd>
+
+            <dt class="col-sm-3">Condition</dt>
+            <dd class="col-sm-9">@Model.Condition</dd>
+
+            <dt class="col-sm-3">Specifications</dt>
+            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Specifications) ? Model.Specifications : "-")</dd>
+
+            <dt class="col-sm-3">Created At</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+        </dl>
+    </div>
+</div>

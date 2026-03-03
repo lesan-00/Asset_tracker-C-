@@ -1,0 +1,111 @@
+@model AssetTracker.Models.Reports.Import.StaffImportPageVm
+
+@{
+    ViewData["Title"] = "Staff Import";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-11">
+        <div class="card shadow-sm border-0" style="border-radius:16px;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="h4 mb-1">Staff Import</h1>
+                        <p class="text-secondary mb-0">Upload CSV/Excel to import or update staff profiles.</p>
+                    </div>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back to Reports</a>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Message))
+                {
+                    <div class="alert alert-info">@Model.Message</div>
+                }
+
+                @if (Model.CommitResult is not null)
+                {
+                    <div class="alert alert-success">
+                        Inserted: <strong>@Model.CommitResult.Inserted</strong>,
+                        Updated: <strong>@Model.CommitResult.Updated</strong>,
+                        Skipped: <strong>@Model.CommitResult.Skipped</strong>,
+                        Failed: <strong>@Model.CommitResult.Failed</strong>.
+                        @if (!string.IsNullOrWhiteSpace(Model.CommitResult.ErrorReportKey))
+                        {
+                            <a asp-action="ImportErrorReport" asp-route-errorReportKey="@Model.CommitResult.ErrorReportKey" class="ms-2">Download error report</a>
+                        }
+                    </div>
+                }
+
+                <div class="d-flex gap-2 mb-3">
+                    <a asp-action="ImportStaffTemplate" class="btn btn-outline-primary">Download CSV Template</a>
+                </div>
+
+                <form asp-action="ImportStaffPreview" method="post" enctype="multipart/form-data" class="row g-3 align-items-end mb-4">
+                    @Html.AntiForgeryToken()
+                    <div class="col-md-7">
+                        <label class="form-label">File (.csv, .xlsx)</label>
+                        <input asp-for="Upload.File" type="file" class="form-control" accept=".csv,.xlsx" />
+                    </div>
+                    <div class="col-md-5 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Preview Import</button>
+                    </div>
+                </form>
+
+                @if (Model.Preview is not null)
+                {
+                    <div class="card border-0 bg-light mb-3">
+                        <div class="card-body py-3">
+                            <div class="fw-semibold mb-1">Preview Summary</div>
+                            <div class="text-secondary">
+                                Total: @Model.Preview.TotalRows |
+                                Valid: @Model.Preview.ValidRows |
+                                Invalid: @Model.Preview.InvalidRows
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="ImportStaffCommit" method="post" class="d-flex gap-4 align-items-center flex-wrap mb-3">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Upload.ImportKey" value="@Model.Preview.ImportKey" />
+                        <div class="form-check">
+                            <input asp-for="Upload.UpdateExisting" class="form-check-input" />
+                            <label asp-for="Upload.UpdateExisting" class="form-check-label">Update existing by EmployeeNumber</label>
+                        </div>
+                        <div class="form-check">
+                            <input asp-for="Upload.SkipInvalid" class="form-check-input" />
+                            <label asp-for="Upload.SkipInvalid" class="form-check-label">Skip invalid rows</label>
+                        </div>
+                        <button type="submit" class="btn btn-success">Import Now</button>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Row</th>
+                                    <th>FullName</th>
+                                    <th>EmployeeNumber</th>
+                                    <th>Department</th>
+                                    <th>Phone</th>
+                                    <th>Validation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var row in Model.Preview.Rows.Take(50))
+                            {
+                                <tr class="@(row.IsValid ? "" : "table-danger")">
+                                    <td>@row.RowNumber</td>
+                                    <td>@(row.Raw.TryGetValue("FullName", out var name) ? name : "-")</td>
+                                    <td>@(row.Raw.TryGetValue("EmployeeNumber", out var emp) ? emp : "-")</td>
+                                    <td>@(row.Raw.TryGetValue("Department", out var dep) ? dep : "-")</td>
+                                    <td>@(row.Raw.TryGetValue("PhoneNumber", out var phone) ? phone : "-")</td>
+                                    <td>@(row.IsValid ? "OK" : string.Join("; ", row.Errors))</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

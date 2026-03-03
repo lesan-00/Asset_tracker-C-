@@ -1,0 +1,45 @@
+@model IEnumerable<AssetTracker.Models.Reports.ActiveAssignmentRowVm>
+
+@{
+    ViewData["Title"] = "Active Assignments";
+}
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 mb-1">Active Assignments</h1>
+        <p class="text-secondary mb-0">Currently active custody and deployment records.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Target Type</th>
+                    <th>Target</th>
+                    <th>Asset</th>
+                    <th>Location</th>
+                    <th>Assigned At</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td>@row.AssignmentId</td>
+                    <td>@row.TargetType</td>
+                    <td>@row.TargetDisplay</td>
+                    <td>@row.AssetTag - @row.AssetDisplay</td>
+                    <td>@row.Location</td>
+                    <td>@row.AssignedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@row.Status</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

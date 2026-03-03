@@ -1,0 +1,78 @@
+@model AssetTracker.Models.Reports.InventoryReportVM
+
+@{
+    ViewData["Title"] = "Inventory Report";
+}
+
+<div class="mb-3">
+    <h1 class="h3 mb-1">Inventory Report</h1>
+    <p class="text-secondary mb-0">Current asset distribution by status.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Total Assets</div>
+                <div class="fs-3 fw-semibold">@Model.TotalAssets</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">In Stock</div>
+                <div class="fs-3 fw-semibold">@Model.InStock</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Assigned</div>
+                <div class="fs-3 fw-semibold">@Model.Assigned</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">In Repair</div>
+                <div class="fs-3 fw-semibold">@Model.InRepair</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Retired</div>
+                <div class="fs-3 fw-semibold">@Model.Retired</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
+        <h2 class="h6 mb-0">Status Breakdown</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Status</th>
+                    <th class="text-end">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model.StatusCounts)
+            {
+                <tr>
+                    <td>@row.Status</td>
+                    <td class="text-end">@row.Count</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

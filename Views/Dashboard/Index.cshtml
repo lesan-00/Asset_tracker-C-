@@ -1,0 +1,119 @@
+@model AssetTracker.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="mb-4">
+    <h2 class="h4 mb-1">Asset Operations Overview</h2>
+    <p class="text-secondary mb-0">Track core inventory health and allocation at a glance.</p>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-controller="Dashboard" asp-action="Index" method="get" class="row g-2 align-items-center">
+            <div class="col-12 col-lg">
+                <input type="text"
+                       name="q"
+                       value="@Model.Query"
+                       class="form-control"
+                       placeholder="Search staff or assets..." />
+            </div>
+            <div class="col-12 col-lg-auto">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card dashboard-card h-100">
+            <div class="card-body">
+                <h3 class="h6 text-secondary mb-2">Total Assets</h3>
+                <div class="dashboard-kpi">@Model.TotalAssets</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card dashboard-card h-100">
+            <div class="card-body">
+                <h3 class="h6 text-secondary mb-2">In Stock</h3>
+                <div class="dashboard-kpi">@Model.InStock</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card dashboard-card h-100">
+            <div class="card-body">
+                <h3 class="h6 text-secondary mb-2">Assigned</h3>
+                <div class="dashboard-kpi">@Model.Assigned</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card dashboard-card h-100">
+            <div class="card-body">
+                <h3 class="h6 text-secondary mb-2">In Repair</h3>
+                <div class="dashboard-kpi">@Model.InRepair</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card dashboard-card h-100">
+            <div class="card-body">
+                <h3 class="h6 text-secondary mb-2">Open Issues</h3>
+                <div class="dashboard-kpi">@Model.OpenIssues</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Query))
+{
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white">
+            <h3 class="h6 mb-0">Search Results</h3>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Results.Count == 0)
+            {
+                <div class="p-3 text-secondary">No results found for "@Model.Query".</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Title</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var result in Model.Results)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge @(result.Type == "Asset" ? "text-bg-primary" : "text-bg-success")">
+                                        @result.Type
+                                    </span>
+                                </td>
+                                <td class="fw-semibold">@result.Title</td>
+                                <td class="text-secondary">@result.SubTitle</td>
+                                <td>@result.StatusText</td>
+                                <td class="text-end">
+                                    <a href="@result.LinkUrl" class="btn btn-sm btn-outline-secondary">View</a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+}

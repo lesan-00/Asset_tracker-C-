@@ -1,0 +1,45 @@
+@model IEnumerable<AssetTracker.Models.Reports.AssignmentHistoryRowVm>
+
+@{
+    ViewData["Title"] = "Assignment History";
+}
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 mb-1">Assignment History</h1>
+        <p class="text-secondary mb-0">Complete timeline of assignment events.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Asset</th>
+                    <th>Staff</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Assigned</th>
+                    <th>Returned</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td>@row.AssignmentId</td>
+                    <td>@row.AssetTag</td>
+                    <td>@row.StaffName</td>
+                    <td>@row.Department</td>
+                    <td>@row.Status</td>
+                    <td>@row.AssignedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(row.ReturnedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

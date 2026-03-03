@@ -1,0 +1,18 @@
+bin/
+obj/
+.artifacts/
+.vs/
+*.user
+*.suo
+*.nupkg
+*.snupkg
+*.db
+*.pdb
+
+# Rider/VSCode
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

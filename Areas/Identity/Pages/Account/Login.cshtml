@@ -1,0 +1,84 @@
+@page
+@model AssetTracker.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = "/Views/Shared/_AuthLayout.cshtml";
+}
+
+<style>
+    .auth-page {
+        min-height: 100vh;
+        background: linear-gradient(180deg, #f3f7ff 0%, #edf3fb 100%);
+    }
+
+    .auth-wrap {
+        width: 100%;
+        max-width: 520px;
+        padding: 1rem;
+    }
+
+    .auth-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 14px 36px rgba(24, 39, 75, 0.12);
+        border: 1px solid #e9eef8;
+    }
+
+    .auth-input.form-control {
+        min-height: 48px;
+        border-radius: 12px;
+        background-color: #eef4ff;
+        border: 1px solid #dbe6f8;
+    }
+
+    .auth-input.form-control:focus {
+        background-color: #f4f8ff;
+        border-color: #8fb1ea;
+        box-shadow: 0 0 0 .25rem rgba(58, 107, 198, .15);
+    }
+
+    @@media (max-width: 575.98px) {
+        .auth-card {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+<main class="auth-page d-flex align-items-center justify-content-center py-4">
+    <div class="auth-wrap">
+        <section class="auth-card">
+            <header class="mb-4 text-center">
+                <h1 class="h3 fw-semibold mb-2">Asset Tracker</h1>
+                <p class="text-secondary mb-0">Sign in to manage your IT assets</p>
+            </header>
+
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" class="form-control auth-input" autocomplete="username" aria-required="true" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label"></label>
+                    <input asp-for="Input.Password" class="form-control auth-input" autocomplete="current-password" aria-required="true" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                    <label class="form-check-label" asp-for="Input.RememberMe"></label>
+                </div>
+
+                <button id="login-submit" type="submit" class="btn btn-primary w-100 py-2">Sign In</button>
+            </form>
+        </section>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

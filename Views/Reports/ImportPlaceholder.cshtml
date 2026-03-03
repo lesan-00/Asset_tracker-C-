@@ -1,0 +1,16 @@
+@{
+    var importType = ViewData["ImportType"]?.ToString() ?? "Data";
+    ViewData["Title"] = $"{importType} Import";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 text-center">
+                <h1 class="h4 mb-2">@importType Import</h1>
+                <p class="text-secondary mb-3">Coming soon.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to Reports</a>
+            </div>
+        </div>
+    </div>
+</div>

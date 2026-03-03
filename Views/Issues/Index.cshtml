@@ -1,0 +1,306 @@
+@using System.Text.Json
+@using AssetTracker.Models
+@model AssetTracker.Models.Issues.IssuesIndexViewModel
+
+@{
+    ViewData["Title"] = "Issue Tracking";
+
+    static string StatusClass(IssueStatus status) => status switch
+    {
+        IssueStatus.Open => "bg-danger-subtle text-danger-emphasis",
+        IssueStatus.InProgress => "bg-warning-subtle text-warning-emphasis",
+        IssueStatus.Resolved => "bg-success-subtle text-success-emphasis",
+        IssueStatus.Closed => "bg-secondary-subtle text-secondary-emphasis",
+        _ => "bg-secondary-subtle text-secondary-emphasis"
+    };
+
+    static string PriorityClass(IssuePriority priority) => priority switch
+    {
+        IssuePriority.High => "bg-danger-subtle text-danger-emphasis",
+        IssuePriority.Medium => "bg-warning-subtle text-warning-emphasis",
+        IssuePriority.Low => "bg-info-subtle text-info-emphasis",
+        _ => "bg-secondary-subtle text-secondary-emphasis"
+    };
+}
+
+<style>
+    .issues-shell .summary-card,
+    .issues-shell .issue-card {
+        border: 0;
+        border-radius: 14px;
+    }
+
+    .issues-shell .status-pill,
+    .issues-shell .priority-pill {
+        border-radius: 999px;
+        padding: .25rem .7rem;
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+    .issue-modal .modal-content {
+        border-radius: 16px;
+        border: 1px solid #e7edf8;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+    }
+</style>
+
+<div class="issues-shell">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Issue Tracking</h1>
+            <p class="text-secondary mb-0">Track incidents and resolve asset-related problems quickly.</p>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reportIssueModal">+ Report Issue</button>
+    </div>
+
+    @if (TempData["IssueSuccess"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm summary-card">
+                <div class="card-body">
+                    <div class="text-secondary small text-uppercase">Open</div>
+                    <div class="display-6 fw-semibold">@Model.OpenCount</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm summary-card">
+                <div class="card-body">
+                    <div class="text-secondary small text-uppercase">Resolved</div>
+                    <div class="display-6 fw-semibold">@Model.ResolvedCount</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="get" asp-controller="Issues" asp-action="Index" class="card shadow-sm summary-card mb-4">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-12 col-lg-5">
+                    <input type="search" name="q" value="@Model.Q" class="form-control" placeholder="Search issues..." />
+                </div>
+                <div class="col-6 col-lg-3">
+                    <select name="status" class="form-select" asp-items="Model.StatusOptions">
+                        <option value="">Default (Open)</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <select name="priority" class="form-select" asp-items="Model.PriorityOptions"></select>
+                </div>
+                <div class="col-12 col-lg-1 d-grid">
+                    <button type="submit" class="btn btn-outline-secondary">Go</button>
+                </div>
+                <div class="col-12">
+                    <a asp-action="Index" class="btn btn-link p-0 text-decoration-none">Reset Filters</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="card shadow-sm summary-card">
+            <div class="card-body py-5 text-center text-secondary">
+                No issues found matching your criteria.
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-grid gap-3">
+            @foreach (var item in Model.Items)
+            {
+                <div class="card shadow-sm issue-card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+                            <div>
+                                <h2 class="h5 mb-1">@item.Title</h2>
+                                <div class="text-secondary small mb-1">Category: @item.Category</div>
+                                <div class="text-secondary small mb-1">Asset: @item.AssetLabel</div>
+                                <div class="text-secondary small mb-1">Reported For: @item.ReportedForLabel</div>
+                                <div class="text-secondary small">Created: @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-md-end">
+                                <span class="status-pill @StatusClass(item.Status)">@item.Status</span>
+                                <span class="priority-pill @PriorityClass(item.Priority)">@item.Priority</span>
+                            </div>
+                        </div>
+
+                        <p class="mt-3 mb-3">@item.Description</p>
+
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                            @if (item.Status != IssueStatus.Resolved && item.Status != IssueStatus.Closed)
+                            {
+                                <form asp-action="Resolve" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="q" value="@Model.Q" />
+                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                    <input type="hidden" name="priority" value="@Model.PriorityFilter" />
+                                    <button type="submit" class="btn btn-sm btn-success">Resolve</button>
+                                </form>
+                            }
+                            <form asp-action="Delete" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="q" value="@Model.Q" />
+                                <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                <input type="hidden" name="priority" value="@Model.PriorityFilter" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div class="modal fade issue-modal" id="reportIssueModal" tabindex="-1" aria-labelledby="reportIssueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-controller="Issues" asp-action="Create" method="post" id="issueCreateForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title" id="reportIssueModalLabel">Report Issue</h5>
+                        <p class="text-secondary mb-0">Create a new issue ticket as admin.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label asp-for="CreateForm.Title" class="form-label"></label>
+                            <input asp-for="CreateForm.Title" class="form-control" maxlength="120" />
+                            <span asp-validation-for="CreateForm.Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="CreateForm.Category" class="form-label"></label>
+                            <input asp-for="CreateForm.Category" class="form-control" maxlength="100" />
+                            <span asp-validation-for="CreateForm.Category" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="CreateForm.Priority" class="form-label"></label>
+                            <select asp-for="CreateForm.Priority" class="form-select" asp-items="Html.GetEnumSelectList<IssuePriority>()"></select>
+                            <span asp-validation-for="CreateForm.Priority" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="assetSearchInput">Asset (optional)</label>
+                            <input id="assetSearchInput"
+                                   class="form-control"
+                                   list="assetLookupList"
+                                   asp-for="CreateForm.AssetSearchText"
+                                   placeholder="Search asset by tag, brand, or model..." />
+                            <datalist id="assetLookupList">
+                                @foreach (var option in Model.CreateForm.AssetLookupItems)
+                                {
+                                    <option value="@option.Text"></option>
+                                }
+                            </datalist>
+                            <input asp-for="CreateForm.AssetId" type="hidden" id="assetIdHidden" />
+                            <span asp-validation-for="CreateForm.AssetId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="reportedForSearchInput">Reported For (optional)</label>
+                            <input id="reportedForSearchInput"
+                                   class="form-control"
+                                   list="staffLookupList"
+                                   asp-for="CreateForm.ReportedForSearchText"
+                                   placeholder="Search by name, employee number, or email..." />
+                            <datalist id="staffLookupList">
+                                @foreach (var option in Model.CreateForm.StaffLookupItems)
+                                {
+                                    <option value="@option.Text"></option>
+                                }
+                            </datalist>
+                            <input asp-for="CreateForm.ReportedForStaffProfileId" type="hidden" id="reportedForIdHidden" />
+                            <span asp-validation-for="CreateForm.ReportedForStaffProfileId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="CreateForm.Description" class="form-label"></label>
+                            <textarea asp-for="CreateForm.Description" class="form-control" rows="5" maxlength="2000" id="descriptionInput"></textarea>
+                            <div class="text-secondary small mt-1"><span id="descriptionCount">0</span>/2000</div>
+                            <span asp-validation-for="CreateForm.Description" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Issue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const assetLookup = @Html.Raw(JsonSerializer.Serialize(Model.CreateForm.AssetLookupItems));
+            const staffLookup = @Html.Raw(JsonSerializer.Serialize(Model.CreateForm.StaffLookupItems));
+            const assetInput = document.getElementById('assetSearchInput');
+            const assetHidden = document.getElementById('assetIdHidden');
+            const staffInput = document.getElementById('reportedForSearchInput');
+            const staffHidden = document.getElementById('reportedForIdHidden');
+            const descInput = document.getElementById('descriptionInput');
+            const descCount = document.getElementById('descriptionCount');
+            const modalElement = document.getElementById('reportIssueModal');
+            const shouldOpenModal = @Model.OpenCreateModal.ToString().ToLowerInvariant();
+
+            const resolveId = (items, text) => {
+                const typed = (text || '').trim().toLowerCase();
+                if (!typed) {
+                    return '';
+                }
+
+                const match = items.find(x => (x.text || '').toLowerCase() === typed);
+                return match ? String(match.id) : '';
+            };
+
+            const wireLookup = (input, hidden, items) => {
+                const sync = () => {
+                    hidden.value = resolveId(items, input.value);
+                };
+
+                input.addEventListener('change', sync);
+                input.addEventListener('blur', sync);
+                input.addEventListener('input', () => {
+                    if (!input.value.trim()) {
+                        hidden.value = '';
+                    }
+                });
+            };
+
+            const updateCounter = () => {
+                descCount.textContent = String((descInput.value || '').length);
+            };
+
+            wireLookup(assetInput, assetHidden, assetLookup);
+            wireLookup(staffInput, staffHidden, staffLookup);
+            updateCounter();
+            descInput.addEventListener('input', updateCounter);
+
+            if (shouldOpenModal) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+        })();
+    </script>
+}

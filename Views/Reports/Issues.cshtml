@@ -1,0 +1,139 @@
+@model AssetTracker.Models.Reports.IssuesSummaryVM
+
+@{
+    ViewData["Title"] = "Issues Report";
+}
+
+<div class="mb-3">
+    <h1 class="h3 mb-1">Issues Report</h1>
+    <p class="text-secondary mb-0">Issue trends by status and priority.</p>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">From</label>
+                <input type="date" name="from" value="@ViewData["From"]" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">To</label>
+                <input type="date" name="to" value="@ViewData["To"]" class="form-control" />
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a asp-action="Issues" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Total Issues</div>
+                <div class="fs-3 fw-semibold">@Model.TotalIssues</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Open</div>
+                <div class="fs-3 fw-semibold">@Model.Open</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">In Progress</div>
+                <div class="fs-3 fw-semibold">@Model.InProgress</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Resolved</div>
+                <div class="fs-3 fw-semibold">@Model.Resolved</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-2">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-secondary small">Closed</div>
+                <div class="fs-3 fw-semibold">@Model.Closed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Priority Breakdown</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Priority</th>
+                            <th class="text-end">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in Model.PriorityCounts)
+                    {
+                        <tr>
+                            <td>@row.Priority</td>
+                            <td class="text-end">@row.Count</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Recent Issues</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Asset</th>
+                            <th>Created By</th>
+                            <th>Assigned To</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var issue in Model.RecentIssues)
+                    {
+                        <tr>
+                            <td>@issue.Id</td>
+                            <td>@issue.Title</td>
+                            <td>@issue.Status</td>
+                            <td>@issue.Priority</td>
+                            <td>@issue.AssetTag</td>
+                            <td>@issue.CreatedByEmail</td>
+                            <td>@issue.AssignedToEmail</td>
+                            <td>@issue.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

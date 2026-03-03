@@ -1,0 +1,32 @@
+@model AssetTracker.Models.StaffProfile
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
+        <h1 class="h4 mb-0">My Profile</h1>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Full Name</dt>
+            <dd class="col-sm-9">@Model.FullName</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@(Model.User?.Email ?? "-")</dd>
+
+            <dt class="col-sm-3">Employee Number</dt>
+            <dd class="col-sm-9">@Model.EmployeeNumber</dd>
+
+            <dt class="col-sm-3">Department</dt>
+            <dd class="col-sm-9">@Model.Department</dd>
+
+            <dt class="col-sm-3">Phone Number</dt>
+            <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-3">Created At</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+        </dl>
+    </div>
+</div>

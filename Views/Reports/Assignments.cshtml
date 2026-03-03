@@ -1,0 +1,77 @@
+@model IEnumerable<AssetTracker.Models.Reports.AssignmentReportRow>
+
+@{
+    ViewData["Title"] = "Assignments Report";
+}
+
+<div class="mb-3">
+    <h1 class="h3 mb-1">Assignments Report</h1>
+    <p class="text-secondary mb-0">Filter assignment history by date, asset, and staff.</p>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">From</label>
+                <input type="date" name="from" value="@ViewData["From"]" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To</label>
+                <input type="date" name="to" value="@ViewData["To"]" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Asset</label>
+                <select name="assetId" asp-items="ViewBag.AssetId" class="form-select">
+                    <option value="">All Assets</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Staff</label>
+                <select name="staffProfileId" asp-items="ViewBag.StaffProfileId" class="form-select">
+                    <option value="">All Staff</option>
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a asp-action="Assignments" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Asset</th>
+                    <th>Staff</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Assigned</th>
+                    <th>Accepted</th>
+                    <th>Return Requested</th>
+                    <th>Return Approved</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td>@row.AssignmentId</td>
+                    <td>@row.AssetTag</td>
+                    <td>@row.StaffName</td>
+                    <td>@row.StaffEmail</td>
+                    <td>@row.Status</td>
+                    <td>@row.AssignedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(row.AcceptedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                    <td>@(row.ReturnRequestedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                    <td>@(row.ReturnedApprovedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

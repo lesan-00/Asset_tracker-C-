@@ -1,0 +1,35 @@
+@model AssetTracker.Models.StaffProfile
+
+@{
+    ViewData["Title"] = "Delete Staff Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0 text-danger">Delete Staff Profile</h1>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Are you sure you want to delete this profile?</p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Full Name</dt>
+                    <dd class="col-sm-8">@Model.FullName</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">@(Model.User?.Email ?? "-")</dd>
+
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">@Model.Department</dd>
+                </dl>
+
+                <form asp-action="Delete" class="d-flex gap-2">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

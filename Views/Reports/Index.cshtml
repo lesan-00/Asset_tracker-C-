@@ -1,0 +1,145 @@
+@model AssetTracker.Models.Reports.ReportsIndexVm
+
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<style>
+    .reports-shell .report-card {
+        border: 0;
+        border-radius: 16px;
+    }
+
+    .reports-shell .report-icon {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #edf3ff;
+        color: #2d5fbf;
+        font-weight: 700;
+    }
+</style>
+
+<div class="reports-shell d-grid gap-4">
+    <div class="mb-1">
+        <h1 class="h3 mb-1">Reports</h1>
+        <p class="text-secondary mb-0">Generate operational and compliance-ready exports from live system data.</p>
+    </div>
+
+    <div class="card shadow-sm report-card">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="report-icon">A</span>
+                        <h2 class="h5 mb-0">Full Asset Register</h2>
+                    </div>
+                    <p class="text-secondary mb-0">Complete asset inventory with type, specs, department, status, and lifecycle dates.</p>
+                </div>
+                <div class="d-flex gap-2 align-self-start">
+                    <button type="submit" form="inventoryForm" formaction="@Url.Action("InventoryView","Reports")" class="btn btn-outline-secondary">View</button>
+                    <button type="submit" form="inventoryForm" formaction="@Url.Action("InventoryExcel","Reports")" class="btn btn-outline-secondary">Excel</button>
+                    <button type="submit" form="inventoryForm" formaction="@Url.Action("InventoryPdf","Reports")" class="btn btn-outline-secondary">PDF</button>
+                </div>
+            </div>
+
+            <form id="inventoryForm" method="get" class="row g-2">
+                <div class="col-12 col-lg-3">
+                    <input type="text" name="search" value="@Model.InventorySearch" class="form-control" placeholder="Search (tag/serial/brand/model)" />
+                </div>
+                <div class="col-6 col-lg-2">
+                    <select name="type" class="form-select" asp-items="Model.TypeOptions"></select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <select name="status" class="form-select" asp-items="Model.StatusOptions"></select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <input type="text" name="department" value="@Model.InventoryDepartment" class="form-control" placeholder="Department" />
+                </div>
+                <div class="col-6 col-lg-3">
+                    <input type="text" name="location" value="@Model.InventoryLocation" class="form-control" placeholder="Location" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm report-card">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="report-icon">B</span>
+                        <h2 class="h5 mb-0">Active Assignments</h2>
+                    </div>
+                    <p class="text-secondary mb-0">Only active custody or deployment records with asset details and issued accessories.</p>
+                </div>
+                <div class="d-flex gap-2 align-self-start">
+                    <button type="submit" form="activeForm" formaction="@Url.Action("ActiveAssignmentsView","Reports")" class="btn btn-outline-secondary">View</button>
+                    <button type="submit" form="activeForm" formaction="@Url.Action("ActiveAssignmentsExcel","Reports")" class="btn btn-outline-secondary">Excel</button>
+                    <button type="submit" form="activeForm" formaction="@Url.Action("ActiveAssignmentsPdf","Reports")" class="btn btn-outline-secondary">PDF</button>
+                </div>
+            </div>
+
+            <form id="activeForm" method="get" class="row g-2">
+                <div class="col-12 col-lg-3">
+                    <select name="targetType" class="form-select" asp-items="Model.TargetTypeOptions"></select>
+                </div>
+                <div class="col-12 col-lg-9">
+                    <input type="text" name="search" value="@Model.ActiveSearch" class="form-control" placeholder="Search asset / assignee / location" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm report-card">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="report-icon">C</span>
+                        <h2 class="h5 mb-0">Assignment History</h2>
+                    </div>
+                    <p class="text-secondary mb-0">Full assignment timeline including issue, acceptance, return, rejection, and revert events.</p>
+                </div>
+                <div class="d-flex gap-2 align-self-start">
+                    <button type="submit" form="historyForm" formaction="@Url.Action("AssignmentHistoryView","Reports")" class="btn btn-outline-secondary">View</button>
+                    <button type="submit" form="historyForm" formaction="@Url.Action("AssignmentHistoryExcel","Reports")" class="btn btn-outline-secondary">Excel</button>
+                    <button type="submit" form="historyForm" formaction="@Url.Action("AssignmentHistoryPdf","Reports")" class="btn btn-outline-secondary">PDF</button>
+                </div>
+            </div>
+
+            <form id="historyForm" method="get" class="row g-2">
+                <div class="col-6 col-lg-3">
+                    <input type="date" name="from" value="@Model.HistoryFrom?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-6 col-lg-3">
+                    <input type="date" name="to" value="@Model.HistoryTo?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-12 col-lg-6">
+                    <input type="text" name="search" value="@Model.HistorySearch" class="form-control" placeholder="Search by assignment / asset / staff" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm report-card">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="report-icon">D</span>
+                        <h2 class="h5 mb-0">Data Import</h2>
+                    </div>
+                    <p class="text-secondary mb-0">Import asset or staff master data from CSV/Excel files</p>
+                </div>
+                <div class="d-flex gap-2 align-self-start">
+                    <a asp-action="ImportAssets" class="btn btn-outline-secondary">Import Assets</a>
+                    <a asp-action="ImportStaff" class="btn btn-outline-secondary">Import Staff</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+@using AssetTracker.Models
+@model AssetTracker.Models.Assignment
+
+@{
+    ViewData["Title"] = "Assignment Details";
+
+    var displayStatus = Model.Status switch
+    {
+        AssignmentStatus.PendingAcceptance => AssignmentStatus.Active,
+        AssignmentStatus.Accepted => AssignmentStatus.Active,
+        AssignmentStatus.ReturnRequested => AssignmentStatus.Active,
+        AssignmentStatus.ReturnedApproved => AssignmentStatus.Returned,
+        _ => Model.Status
+    };
+
+    var returnedAt = Model.ReturnedApprovedAt;
+    var isActive = displayStatus == AssignmentStatus.Active;
+    var receiverDisplay = Model.StaffProfile.FullName;
+    if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        var lines = Model.Notes.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var line in lines)
+        {
+            if (line.StartsWith("TARGET:DEPARTMENT=", StringComparison.OrdinalIgnoreCase))
+            {
+                receiverDisplay = $"Dept: {line["TARGET:DEPARTMENT=".Length..].Trim()}";
+                break;
+            }
+
+            if (line.StartsWith("TARGET:LOCATION=", StringComparison.OrdinalIgnoreCase))
+            {
+                receiverDisplay = $"Loc: {line["TARGET:LOCATION=".Length..].Trim()}";
+                break;
+            }
+        }
+    }
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h1 class="h4 mb-0">Assignment Details</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back to List</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">Delete</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Asset</dt>
+            <dd class="col-sm-9">@Model.Asset.AssetTag</dd>
+
+            <dt class="col-sm-3">Receiver</dt>
+            <dd class="col-sm-9">@receiverDisplay</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@displayStatus</dd>
+
+            <dt class="col-sm-3">Assigned At</dt>
+            <dd class="col-sm-9">@Model.AssignedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+
+            <dt class="col-sm-3">Returned At</dt>
+            <dd class="col-sm-9">@(returnedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</dd>
+
+            <dt class="col-sm-3">Notes</dt>
+            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Notes) ? Model.Notes : "-")</dd>
+        </dl>
+
+        <div class="d-flex gap-2">
+            @if (isActive)
+            {
+                <form asp-action="MarkReturned" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success">Mark Returned</button>
+                </form>
+                <form asp-action="Revert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-warning">Revert</button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
