@@ -383,10 +383,12 @@ public class ReportsController : Controller
         string? department,
         string? location)
     {
-        var activeStatuses = ActiveAssignmentStatuses();
         var activeAssignments = _context.Assignments
             .AsNoTracking()
-            .Where(a => activeStatuses.Contains(a.Status));
+            .Where(a => a.Status == AssignmentStatus.Active
+                        || a.Status == AssignmentStatus.PendingAcceptance
+                        || a.Status == AssignmentStatus.Accepted
+                        || a.Status == AssignmentStatus.ReturnRequested);
 
         // EF Core + Pomelo may fail translating grouped subqueries that project navigations.
         // We compute latest active assignment per asset via aggregate subqueries and rejoin.
@@ -496,12 +498,14 @@ public class ReportsController : Controller
     private async Task<List<ActiveAssignmentRowVm>> QueryActiveAssignmentRowsAsync(string? targetType, string? search)
     {
         var effectiveTarget = ParseTargetType(targetType);
-        var statuses = ActiveAssignmentStatuses();
         var query = _context.Assignments
             .AsNoTracking()
             .Include(a => a.Asset)
             .Include(a => a.StaffProfile)
-            .Where(a => statuses.Contains(a.Status))
+            .Where(a => a.Status == AssignmentStatus.Active
+                        || a.Status == AssignmentStatus.PendingAcceptance
+                        || a.Status == AssignmentStatus.Accepted
+                        || a.Status == AssignmentStatus.ReturnRequested)
             .AsQueryable();
 
         var normalizedSearch = search?.Trim();
@@ -599,17 +603,6 @@ public class ReportsController : Controller
         }
 
         return AssignmentTargetTypeFilter.Staff;
-    }
-
-    private static List<AssignmentStatus> ActiveAssignmentStatuses()
-    {
-        return
-        [
-            AssignmentStatus.Active,
-            AssignmentStatus.PendingAcceptance,
-            AssignmentStatus.Accepted,
-            AssignmentStatus.ReturnRequested
-        ];
     }
 
     private static AssignmentStatus NormalizeAssignmentStatus(AssignmentStatus status)

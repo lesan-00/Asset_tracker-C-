@@ -1,0 +1,90 @@
+@model AssetTracker.Models.SearchResultsVm
+
+<div class="container-fluid px-0">
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <form asp-controller="Search" asp-action="Results" method="get" class="row g-2">
+                <div class="col-12 col-md-10">
+                    <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Search assets or staff..." />
+                </div>
+                <div class="col-12 col-md-2 d-grid">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-semibold">Assets (@Model.Assets.Count)</div>
+                <div class="card-body p-0">
+                    @if (Model.Assets.Count == 0)
+                    {
+                        <div class="p-3 text-secondary">No asset matches found.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset Tag</th>
+                                        <th>Model</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var row in Model.Assets)
+                                {
+                                    <tr>
+                                        <td><a asp-controller="Assets" asp-action="Details" asp-route-id="@row.Id">@row.AssetTag</a></td>
+                                        <td>@row.Display <span class="text-secondary">(@row.SerialNumber)</span></td>
+                                        <td>@row.Status</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-semibold">Staff (@Model.Staff.Count)</div>
+                <div class="card-body p-0">
+                    @if (Model.Staff.Count == 0)
+                    {
+                        <div class="p-3 text-secondary">No staff matches found.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var row in Model.Staff)
+                                {
+                                    <tr>
+                                        <td><a asp-controller="Staff" asp-action="Details" asp-route-id="@row.Id">@row.FullName</a><div class="text-secondary small">@row.EmployeeNumber</div></td>
+                                        <td>@row.Department</td>
+                                        <td>@row.PhoneNumber</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

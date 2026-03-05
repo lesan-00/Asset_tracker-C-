@@ -1,4 +1,4 @@
-html, body {
+﻿html, body {
   height: 100%;
 }
 
@@ -9,40 +9,82 @@ body {
   color: #1f2937;
 }
 
+/* ---- PROFESSIONAL SIDEBAR STYLING ---- */
 .app-sidebar {
-  width: 260px;
-  background: #111827;
-  color: #e5e7eb;
+  width: 260px !important;
+  background-color: #071a3a !important;
+  color: #ffffff !important;
+  padding: 25px 12px !important;
+  border-right: 3px solid #1f4fbf !important;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.15) !important;
 }
 
 .sidebar-brand {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #f9fafb;
+  color: #ffffff !important;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
 }
 
+/* Navigation links styling */
 .app-sidebar .nav-link {
-  border-radius: 0.5rem;
-  padding: 0.6rem 0.85rem;
+  color: #cfd8dc !important;
+  padding: 12px 16px !important;
+  margin-bottom: 6px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
+.app-sidebar .nav-link i {
+  width: 18px;
+  text-align: center;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+/* Hover effect with slide animation */
 .app-sidebar .nav-link:hover,
 .app-sidebar .nav-link:focus {
-  background-color: #1f2937;
-  color: #ffffff;
+  background-color: #123d8d !important;
+  color: #ffffff !important;
+  transform: translateX(3px);
 }
 
+/* Active selected page */
 .app-sidebar .nav-link.active {
-  background-color: #0d6efd;
-  color: #ffffff;
+  background-color: #1f4fbf !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
 }
 
+/* Item spacing */
+.app-sidebar .nav-item + .nav-item {
+  margin-top: 0.25rem;
+}
+
+/* Prevent link decoration */
+.app-sidebar a {
+  text-decoration: none;
+}
+
+/* Main content adjustment */
 .app-main {
   background-color: #f3f6fb;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .topbar {
   min-height: 64px;
+  background-color: #ffffff;
 }
 
 .dropdown-menu .navbar-nav {
@@ -80,4 +122,108 @@ body {
   .sidebar-brand {
     font-size: 0.95rem;
   }
+
+  .app-main {
+    margin-left: 86px;
+  }
+}
+
+/* Sidebar navigation links */
+.sidebar .nav-link,
+.nav.flex-column .nav-link {
+
+    color: #ffffff;
+    font-weight: 500;
+    padding: 12px 16px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.sidebar .nav-link:hover,
+.nav.flex-column .nav-link:hover {
+
+    background-color: #123d8d;
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+/* Active selected page */
+.sidebar .nav-link.active,
+.nav.flex-column .nav-link.active {
+
+    background-color: #1f4fbf;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+
+
+
+/* ===== Dashboard unified panel theme ===== */
+.card,
+.dashboard-card,
+.panel-card{
+  border-radius: 14px !important;
+  border: 1px solid rgba(0,0,0,.06) !important;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden;
+  background: #fff;
+}
+
+.card-header{
+  background: #fff !important;
+  border-bottom: 1px solid rgba(0,0,0,.06) !important;
+  padding: 12px 16px !important;
+}
+
+.card-body{
+  padding: 16px !important;
+}
+
+/* KPI typography consistency */
+.dashboard-kpi{
+  font-size: 1.9rem !important;
+  font-weight: 800 !important;
+}
+
+/* Lists inside cards */
+.list-group-item{
+  border-color: rgba(0,0,0,.06) !important;
+  padding: 12px 16px !important;
+}
+
+/* ===== Recent Activity: limit height and scroll ===== */
+.panel-list-scroll{
+  max-height: 260px;   /* adjust as needed: 220–320px */
+  overflow-y: auto;
+}
+
+/* Optional: nicer scrollbar */
+.panel-list-scroll::-webkit-scrollbar{ width: 10px; }
+.panel-list-scroll::-webkit-scrollbar-thumb{ background: rgba(0,0,0,.15); border-radius: 999px; }
+.panel-list-scroll::-webkit-scrollbar-track{ background: rgba(0,0,0,.03); }
+
+/* KPI panels (top dashboard cards) */
+.dashboard-card,
+.kpi-card{
+    background: #e8f5e9 !important;              /* soft green */
+    border: 1px solid #c8e6c9 !important;
+    border-radius: 14px;
+}
+
+/* KPI title text */
+.dashboard-card h3,
+.kpi-card .kpi-label{
+    color: #2e7d32 !important;
+    font-weight: 600;
+}
+
+/* KPI numbers */
+.dashboard-kpi,
+.kpi-card .kpi-value{
+    color: #1b5e20 !important;
+    font-size: 1.9rem;
+    font-weight: 700;
 }

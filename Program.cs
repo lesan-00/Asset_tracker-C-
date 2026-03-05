@@ -1,4 +1,4 @@
-using AssetTracker.Data;
+﻿using AssetTracker.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -80,6 +80,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.Equals("/Identity/Account/Register", StringComparison.OrdinalIgnoreCase))
@@ -117,3 +118,5 @@ app.MapRazorPages();
 await IdentitySeeder.SeedAsync(app.Services, builder.Configuration);
 
 app.Run();
+
+

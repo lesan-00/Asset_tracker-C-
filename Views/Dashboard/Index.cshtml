@@ -1,119 +1,151 @@
-@model AssetTracker.Models.DashboardViewModel
+﻿@model AssetTracker.Models.DashboardVm
 
 @{
     ViewData["Title"] = "Dashboard";
+
+    static string PriorityBadgeClass(AssetTracker.Models.IssuePriority priority)
+    {
+        return priority switch
+        {
+            AssetTracker.Models.IssuePriority.High => "badge-soft-danger",
+            AssetTracker.Models.IssuePriority.Medium => "badge-soft-warning",
+            _ => "badge-soft-secondary"
+        };
+    }
 }
 
-<div class="mb-4">
-    <h2 class="h4 mb-1">Asset Operations Overview</h2>
-    <p class="text-secondary mb-0">Track core inventory health and allocation at a glance.</p>
-</div>
+<div class="dashboard-page">
+    <section class="dashboard-hero">
+        <div>
+            <h2 class="dashboard-title">Asset Operations Overview</h2>
+            <p class="dashboard-subtitle mb-0">Track core inventory health and allocation at a glance.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-controller="Assets" asp-action="Create" class="btn btn-primary">Add Asset</a>
+            <a asp-controller="Assignments" asp-action="Create" class="btn btn-outline-primary">Assign</a>
+        </div>
+    </section>
 
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <form asp-controller="Dashboard" asp-action="Index" method="get" class="row g-2 align-items-center">
-            <div class="col-12 col-lg">
-                <input type="text"
-                       name="q"
-                       value="@Model.Query"
-                       class="form-control"
-                       placeholder="Search staff or assets..." />
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label">Total Assets</div>
+                    <div class="kpi-value">@Model.TotalAssets</div>
+                </div>
             </div>
-            <div class="col-12 col-lg-auto">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label">In Stock</div>
+                    <div class="kpi-value">@Model.InStock</div>
+                </div>
             </div>
-        </form>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label">Assigned</div>
+                    <div class="kpi-value">@Model.Assigned</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label">In Repair</div>
+                    <div class="kpi-value">@Model.InRepair</div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="row g-4">
-    <div class="col-md-6 col-xl-3">
-        <div class="card dashboard-card h-100">
-            <div class="card-body">
-                <h3 class="h6 text-secondary mb-2">Total Assets</h3>
-                <div class="dashboard-kpi">@Model.TotalAssets</div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card panel-card h-100">
+                <div class="card-header panel-header d-flex justify-content-between align-items-center">
+                    <h3 class="panel-title mb-0">Allocation by Department</h3>
+                    <span class="badge text-bg-light">Assigned: @Model.Assigned</span>
+                </div>
+                <div class="card-body panel-body">
+                    @if (Model.AllocationByDepartment.Count == 0)
+                    {
+                        <p class="text-secondary mb-0">No department allocation data.</p>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.AllocationByDepartment)
+                        {
+                            <div class="allocation-item">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-medium">@item.DepartmentName</span>
+                                    <span class="text-secondary">@item.Count (@item.Percent%)</span>
+                                </div>
+                                <div class="allocation-track">
+                                    <div class="allocation-fill" role="progressbar" style="width:@item.Percent%"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="card dashboard-card h-100">
-            <div class="card-body">
-                <h3 class="h6 text-secondary mb-2">In Stock</h3>
-                <div class="dashboard-kpi">@Model.InStock</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="card dashboard-card h-100">
-            <div class="card-body">
-                <h3 class="h6 text-secondary mb-2">Assigned</h3>
-                <div class="dashboard-kpi">@Model.Assigned</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="card dashboard-card h-100">
-            <div class="card-body">
-                <h3 class="h6 text-secondary mb-2">In Repair</h3>
-                <div class="dashboard-kpi">@Model.InRepair</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="card dashboard-card h-100">
-            <div class="card-body">
-                <h3 class="h6 text-secondary mb-2">Open Issues</h3>
-                <div class="dashboard-kpi">@Model.OpenIssues</div>
-            </div>
-        </div>
-    </div>
-</div>
 
-@if (!string.IsNullOrWhiteSpace(Model.Query))
-{
-    <div class="card border-0 shadow-sm mt-4">
-        <div class="card-header bg-white">
-            <h3 class="h6 mb-0">Search Results</h3>
+        <div class="col-lg-6">
+            <div class="card panel-card h-100">
+                <div class="card-header panel-header d-flex justify-content-between align-items-center">
+                    <h3 class="panel-title mb-0">Open Issues</h3>
+                    <a asp-controller="Issues" asp-action="Index" class="small fw-semibold text-decoration-none">View all</a>
+                </div>
+                <div class="list-group list-group-flush">
+                    @if (Model.LatestOpenIssues.Count == 0)
+                    {
+                        <div class="list-group-item text-secondary">No open issues.</div>
+                    }
+                    else
+                    {
+                        @foreach (var issue in Model.LatestOpenIssues)
+                        {
+                            <a asp-controller="Issues" asp-action="Details" asp-route-id="@issue.Id" class="list-group-item list-group-item-action issue-row">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div>
+                                        <div class="fw-semibold">@issue.Title</div>
+                                        <div class="text-secondary small">@issue.AssetTag • @issue.CreatedAt.ToLocalTime().ToString("g")</div>
+                                    </div>
+                                    <span class="badge @PriorityBadgeClass(issue.Priority)">@issue.Priority</span>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
-            @if (Model.Results.Count == 0)
+    </div>
+
+    <div class="card panel-card">
+        <div class="card-header panel-header">
+            <h3 class="panel-title mb-0">Recent Activity</h3>
+        </div>
+        <div class="list-group list-group-flush panel-list-scroll">
+            @if (Model.RecentActivity.Count == 0)
             {
-                <div class="p-3 text-secondary">No results found for "@Model.Query".</div>
+                <div class="list-group-item text-secondary">No recent activity.</div>
             }
             else
             {
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Type</th>
-                                <th>Title</th>
-                                <th>Details</th>
-                                <th>Status</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var result in Model.Results)
-                        {
-                            <tr>
-                                <td>
-                                    <span class="badge @(result.Type == "Asset" ? "text-bg-primary" : "text-bg-success")">
-                                        @result.Type
-                                    </span>
-                                </td>
-                                <td class="fw-semibold">@result.Title</td>
-                                <td class="text-secondary">@result.SubTitle</td>
-                                <td>@result.StatusText</td>
-                                <td class="text-end">
-                                    <a href="@result.LinkUrl" class="btn btn-sm btn-outline-secondary">View</a>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
+                @foreach (var activity in Model.RecentActivity)
+                {
+                    <div class="list-group-item d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="fw-semibold">@activity.Message</div>
+                            <div class="text-secondary small text-uppercase">@activity.Type</div>
+                        </div>
+                        <div class="text-secondary small">@activity.OccurredAt.ToLocalTime().ToString("g")</div>
+                    </div>
+                }
             }
         </div>
     </div>
-}
+</div>
+
