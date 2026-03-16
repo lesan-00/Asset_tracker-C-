@@ -1,0 +1,355 @@
+@model AssetTracker.Models.Vendors.ViewModels.PurchaseRequestUpsertVm
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Text.Json
+
+@{
+    var formAction = (ViewData["FormAction"] as string) ?? "Create";
+    var cancelAction = (ViewData["CancelAction"] as string) ?? "Index";
+    var isEdit = (ViewData["IsEdit"] as bool?) ?? false;
+    var suggestedVendorOptions = ViewData["SuggestedVendorOptions"] as List<SelectListItem> ?? new List<SelectListItem>();
+    var typeOptions = new List<SelectListItem>
+    {
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Hardware), Text = "Hardware" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Software), Text = "Software" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Service), Text = "Service" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Furniture), Text = "Furniture" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.OfficeSupplies), Text = "Office Supplies" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Accessories), Text = "Accessories" },
+        new() { Value = nameof(AssetTracker.Models.Vendors.PurchaseRequestLineType.Other), Text = "Other" }
+    };
+
+    var initialLines = (Model.Items ?? new List<AssetTracker.Models.Vendors.ViewModels.PurchaseRequestLineInputVm>())
+        .Select(line => new
+        {
+            id = line.Id,
+            lineType = line.LineType?.ToString() ?? string.Empty,
+            name = line.Name ?? string.Empty,
+            description = line.Description ?? string.Empty,
+            quantity = line.Quantity,
+            estimatedUnitCost = line.EstimatedUnitCost,
+            estimatedTotal = line.EstimatedTotal,
+            suggestedVendorId = line.SuggestedVendorId,
+            notes = line.Notes ?? string.Empty
+        })
+        .ToList();
+
+    var typeOptionsJson = JsonSerializer.Serialize(typeOptions.Select(x => new { value = x.Value ?? string.Empty, text = x.Text ?? string.Empty }));
+    var vendorOptionsJson = JsonSerializer.Serialize(suggestedVendorOptions.Select(x => new { value = x.Value ?? string.Empty, text = x.Text ?? string.Empty }));
+    var initialLinesJson = JsonSerializer.Serialize(initialLines);
+}
+
+<form asp-controller="PurchaseRequests" asp-action="@formAction" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (isEdit && !string.IsNullOrWhiteSpace(Model.PrNumber))
+    {
+        <div class="alert alert-light border">
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <div><span class="text-muted">PR Number:</span> <strong>@Model.PrNumber</strong></div>
+                <div><span class="text-muted">Current Status:</span> <strong>@Model.Status</strong></div>
+            </div>
+        </div>
+    }
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="PrNumber" type="hidden" />
+    <input asp-for="Status" type="hidden" />
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label asp-for="RequestDate" class="form-label">Request Date</label>
+            <input asp-for="RequestDate" type="date" class="form-control" />
+            <span asp-validation-for="RequestDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="NeededByDate" class="form-label">Needed By Date</label>
+            <input asp-for="NeededByDate" type="date" class="form-control" />
+            <span asp-validation-for="NeededByDate" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="card border mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h2 class="h6 mb-0">Requested Items / Services</h2>
+            <span class="text-muted small">Add only the lines you need.</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0 pr-lines-table">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width: 130px;">Type</th>
+                        <th style="min-width: 220px;">Name</th>
+                        <th style="min-width: 200px;">Description</th>
+                        <th style="min-width: 95px;">Qty</th>
+                        <th style="min-width: 130px;">Est. Unit Cost</th>
+                        <th style="min-width: 130px;">Est. Total</th>
+                        <th style="min-width: 200px;">Suggested Vendor</th>
+                        <th style="min-width: 160px;">Notes</th>
+                        <th style="min-width: 90px;" class="text-end">Remove</th>
+                    </tr>
+                </thead>
+                <tbody id="pr-lines-body"></tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white">
+            <button type="button" id="add-item-line-btn" class="btn btn-outline-primary btn-sm">+ Add Item / Service</button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label">Notes</label>
+        <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        @if (isEdit)
+        {
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        }
+        else
+        {
+            <button type="submit" name="action" value="draft" class="btn btn-outline-secondary">Save Draft</button>
+            <button type="submit" name="action" value="submit" class="btn btn-primary">Submit for Approval</button>
+        }
+        @if (isEdit && Model.Id.HasValue)
+        {
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-dark">Cancel</a>
+        }
+        else
+        {
+            <a asp-action="@cancelAction" class="btn btn-outline-dark">Cancel</a>
+        }
+    </div>
+</form>
+
+<style>
+    .pr-lines-table th,
+    .pr-lines-table td {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+    (function () {
+        var typeOptions = @Html.Raw(typeOptionsJson);
+        var vendorOptions = @Html.Raw(vendorOptionsJson);
+        var initialLines = @Html.Raw(initialLinesJson);
+        var linesBody = document.getElementById("pr-lines-body");
+        var addButton = document.getElementById("add-item-line-btn");
+
+        if (!linesBody || !addButton) {
+            return;
+        }
+
+        function setSelectOptions(select, options, placeholder, selectedValue) {
+            select.innerHTML = "";
+
+            var placeholderOption = document.createElement("option");
+            placeholderOption.value = "";
+            placeholderOption.textContent = placeholder;
+            select.appendChild(placeholderOption);
+
+            options.forEach(function (option) {
+                var element = document.createElement("option");
+                element.value = option.value;
+                element.textContent = option.text;
+                select.appendChild(element);
+            });
+
+            if (selectedValue !== undefined && selectedValue !== null && selectedValue !== "") {
+                select.value = selectedValue.toString();
+            } else {
+                select.value = "";
+            }
+        }
+
+        function getRowNumberValue(input) {
+            if (!input || input.value === null || input.value === undefined || input.value === "") {
+                return null;
+            }
+
+            var parsed = Number(input.value);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function recalculateRowTotal(row) {
+            var typeSelect = row.querySelector(".type-select");
+            var qtyInput = row.querySelector(".qty-input");
+            var unitCostInput = row.querySelector(".unitcost-input");
+            var totalInput = row.querySelector(".total-input");
+
+            if (!typeSelect || !qtyInput || !unitCostInput || !totalInput) {
+                return;
+            }
+
+            var isService = typeSelect.value === "Service";
+            var qty = getRowNumberValue(qtyInput);
+            var unitCost = getRowNumberValue(unitCostInput);
+
+            if (isService) {
+                return;
+            }
+
+            if (!qtyInput.value) {
+                qtyInput.value = "1";
+                qty = 1;
+            }
+
+            if (!unitCostInput.value) {
+                unitCostInput.value = "0.00";
+                unitCost = 0;
+            }
+
+            if (qty === null || unitCost === null) {
+                totalInput.value = "";
+                return;
+            }
+
+            totalInput.value = (qty * unitCost).toFixed(2);
+        }
+
+        function handleTypeChange(selectElement) {
+            var row = selectElement.closest("tr");
+            if (!row) {
+                return;
+            }
+
+            var qtyInput = row.querySelector(".qty-input");
+            var unitCostInput = row.querySelector(".unitcost-input");
+            var totalInput = row.querySelector(".total-input");
+            if (!qtyInput || !unitCostInput || !totalInput) {
+                return;
+            }
+
+            var isService = selectElement.value === "Service";
+            if (isService) {
+                qtyInput.value = "";
+                unitCostInput.value = "";
+                totalInput.readOnly = false;
+            } else {
+                if (!qtyInput.value) {
+                    qtyInput.value = "1";
+                }
+
+                if (!unitCostInput.value) {
+                    unitCostInput.value = "0.00";
+                }
+
+                totalInput.readOnly = true;
+            }
+
+            recalculateRowTotal(row);
+        }
+
+        function reindexItemRows() {
+            var rows = linesBody.querySelectorAll("tr");
+            rows.forEach(function (row, index) {
+                row.querySelectorAll("[data-field]").forEach(function (input) {
+                    var field = input.getAttribute("data-field");
+                    input.name = "Items[" + index + "]." + field;
+                    input.id = "Items_" + index + "__" + field;
+                });
+            });
+        }
+
+        function removeItemRow(button) {
+            var row = button.closest("tr");
+            if (!row) {
+                return;
+            }
+
+            row.remove();
+            if (linesBody.querySelectorAll("tr").length === 0) {
+                addItemRow();
+            } else {
+                reindexItemRows();
+            }
+        }
+
+        function addItemRow(lineData) {
+            var row = document.createElement("tr");
+            row.className = "pr-line-row";
+
+            row.innerHTML =
+                '<td><input type="hidden" data-field="Id" /><select class="form-select form-select-sm type-select" data-field="LineType"></select></td>' +
+                '<td><input type="text" class="form-control form-control-sm" data-field="Name" placeholder="Goods or service name" /></td>' +
+                '<td><input type="text" class="form-control form-control-sm" data-field="Description" /></td>' +
+                '<td><input type="number" class="form-control form-control-sm qty-input" data-field="Quantity" min="0" step="1" /></td>' +
+                '<td><input type="number" class="form-control form-control-sm unitcost-input" data-field="EstimatedUnitCost" min="0" step="0.01" /></td>' +
+                '<td><input type="number" class="form-control form-control-sm total-input" data-field="EstimatedTotal" min="0" step="0.01" /></td>' +
+                '<td><select class="form-select form-select-sm" data-field="SuggestedVendorId"></select></td>' +
+                '<td><input type="text" class="form-control form-control-sm" data-field="Notes" /></td>' +
+                '<td class="text-end"><button type="button" class="btn btn-outline-danger btn-sm remove-row-btn" aria-label="Remove line">X</button></td>';
+
+            linesBody.appendChild(row);
+
+            var typeSelect = row.querySelector(".type-select");
+            var vendorSelect = row.querySelector('[data-field="SuggestedVendorId"]');
+            setSelectOptions(typeSelect, typeOptions, "Select type", lineData?.lineType ?? "");
+            setSelectOptions(vendorSelect, vendorOptions, "No suggestion", lineData?.suggestedVendorId ?? "");
+
+            row.querySelector('[data-field="Id"]').value = lineData?.id ?? "";
+            row.querySelector('[data-field="Name"]').value = lineData?.name ?? "";
+            row.querySelector('[data-field="Description"]').value = lineData?.description ?? "";
+            row.querySelector('[data-field="Quantity"]').value = lineData?.quantity ?? "";
+            row.querySelector('[data-field="EstimatedUnitCost"]').value = lineData?.estimatedUnitCost ?? "";
+            row.querySelector('[data-field="EstimatedTotal"]').value = lineData?.estimatedTotal ?? "";
+            row.querySelector('[data-field="Notes"]').value = lineData?.notes ?? "";
+
+            reindexItemRows();
+            handleTypeChange(typeSelect);
+        }
+
+        addButton.addEventListener("click", function () {
+            addItemRow();
+        });
+
+        linesBody.addEventListener("click", function (event) {
+            var target = event.target;
+            if (target && target.classList.contains("remove-row-btn")) {
+                removeItemRow(target);
+            }
+        });
+
+        linesBody.addEventListener("change", function (event) {
+            var target = event.target;
+            if (!target) {
+                return;
+            }
+
+            if (target.classList.contains("type-select")) {
+                handleTypeChange(target, false);
+            } else if (target.classList.contains("qty-input") || target.classList.contains("unitcost-input")) {
+                var row = target.closest("tr");
+                if (row) {
+                    recalculateRowTotal(row);
+                }
+            }
+        });
+
+        linesBody.addEventListener("input", function (event) {
+            var target = event.target;
+            if (!target) {
+                return;
+            }
+
+            if (target.classList.contains("qty-input") || target.classList.contains("unitcost-input")) {
+                var row = target.closest("tr");
+                if (row) {
+                    recalculateRowTotal(row);
+                }
+            }
+        });
+
+        if (!Array.isArray(initialLines) || initialLines.length === 0) {
+            addItemRow();
+        } else {
+            initialLines.forEach(function (line) {
+                addItemRow(line);
+            });
+        }
+    })();
+</script>

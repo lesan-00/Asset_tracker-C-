@@ -1,0 +1,240 @@
+@model AssetTracker.Models.Vendors.ViewModels.PurchaseRequestDetailsVm
+
+@{
+    ViewData["Title"] = "Purchase Request Details";
+    var request = Model.Request;
+    var isAdmin = User.IsInRole("Admin");
+    var hasLinkedPo = Model.LinkedPurchaseOrder is not null;
+
+    var canEdit = !hasLinkedPo && request.Status is AssetTracker.Models.Vendors.PurchaseRequestStatus.Draft or AssetTracker.Models.Vendors.PurchaseRequestStatus.Approved;
+    var canSubmit = !hasLinkedPo && request.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.Draft;
+    var canCreatePo = isAdmin
+        && !hasLinkedPo
+        && request.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.Approved;
+    var canCancel = request.Status is not AssetTracker.Models.Vendors.PurchaseRequestStatus.Closed
+        && request.Status is not AssetTracker.Models.Vendors.PurchaseRequestStatus.ConvertedToPO;
+
+    static string StatusBadge(AssetTracker.Models.Vendors.PurchaseRequestStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Draft => "text-bg-secondary",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Submitted => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.PendingApproval => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Approved => "text-bg-success",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Rejected => "text-bg-danger",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.ConvertedToPO => "text-bg-primary",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Cancelled => "text-bg-dark",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Closed => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+
+    static string PriorityBadge(AssetTracker.Models.Vendors.PurchaseRequestPriority priority) => priority switch
+    {
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Urgent => "text-bg-danger",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.High => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Normal => "text-bg-info",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Low => "text-bg-secondary",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@request.PrNumber</h1>
+        <p class="text-muted mb-0">Purchase request details and approval workflow.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        @if (canEdit)
+        {
+            <a asp-action="Edit" asp-route-id="@request.Id" class="btn btn-outline-primary">Edit</a>
+        }
+        @if (canSubmit)
+        {
+            <form asp-action="Submit" asp-route-id="@request.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        }
+        @if (canCreatePo)
+        {
+            <form asp-action="CreatePo" asp-route-id="@request.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-success">Create PO</button>
+            </form>
+        }
+        @if (hasLinkedPo || request.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.ConvertedToPO)
+        {
+            <span class="badge text-bg-secondary align-self-center">Locked</span>
+        }
+        <a asp-action="Index" class="btn btn-outline-dark">Back to List</a>
+    </div>
+</div>
+
+@if (TempData["PrSuccess"] is string successMessage)
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+@if (TempData["PrError"] is string errorMessage)
+{
+    <div class="alert alert-warning">@errorMessage</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Status</div>
+                <div><span class="badge @StatusBadge(request.Status)">@request.Status</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Priority</div>
+                <div><span class="badge @PriorityBadge(request.Priority)">@request.Priority</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Estimated Total</div>
+                <div class="h5 mb-0">KES @Model.EstimatedTotal.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-xl-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Request Information</h2>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">PR Number</dt>
+                    <dd class="col-sm-7">@request.PrNumber</dd>
+                    <dt class="col-sm-5">Request Date</dt>
+                    <dd class="col-sm-7">@request.RequestDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-5">Requested By</dt>
+                    <dd class="col-sm-7">@Model.RequestedByLabel</dd>
+                    <dt class="col-sm-5">Department</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(request.Department) ? "-" : request.Department)</dd>
+                    <dt class="col-sm-5">Needed By Date</dt>
+                    <dd class="col-sm-7">@(request.NeededByDate.HasValue ? request.NeededByDate.Value.ToString("dd MMM yyyy") : "-")</dd>
+                    <dt class="col-sm-5">Created At</dt>
+                    <dd class="col-sm-7">@request.CreatedAt.ToString("dd MMM yyyy, HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Approval Status</h2>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Approved By</dt>
+                    <dd class="col-sm-7">@Model.ApprovedByLabel</dd>
+                    <dt class="col-sm-5">Approved At</dt>
+                    <dd class="col-sm-7">@(request.ApprovedAt.HasValue ? request.ApprovedAt.Value.ToString("dd MMM yyyy, HH:mm") : "-")</dd>
+                    <dt class="col-sm-5">Rejected Reason</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(request.RejectedReason) ? "-" : request.RejectedReason)</dd>
+                </dl>
+
+                @if (canCancel)
+                {
+                    <hr />
+                    <form asp-action="Cancel" asp-route-id="@request.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-dark">Cancel Request</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Requested Items / Services</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Est. Unit Cost</th>
+                            <th>Est. Total</th>
+                            <th>Suggested Vendor</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Lines.Count == 0)
+                        {
+                            <tr><td colspan="8" class="text-center text-muted py-3">No requested lines.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var line in Model.Lines)
+                            {
+                                <tr>
+                                    <td><span class="badge text-bg-light border">@line.LineType</span></td>
+                                    <td class="fw-semibold">@line.Name</td>
+                                    <td>@(string.IsNullOrWhiteSpace(line.Description) ? "-" : line.Description)</td>
+                                    <td>@(line.Quantity.HasValue ? line.Quantity.Value.ToString() : "-")</td>
+                                    <td>@(line.EstimatedUnitCost.HasValue ? $"KES {line.EstimatedUnitCost.Value:N2}" : "-")</td>
+                                    <td>@(line.EstimatedTotal.HasValue ? $"KES {line.EstimatedTotal.Value:N2}" : "-")</td>
+                                    <td>@(line.SuggestedVendor?.CompanyName ?? "-")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(line.Notes) ? "-" : line.Notes)</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h2 class="h6 mb-0">Linked PO</h2>
+            </div>
+            <div class="card-body">
+                @if (Model.LinkedPurchaseOrder is null)
+                {
+                    <p class="text-muted mb-0">No purchase order linked yet.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-4">
+                        <div>
+                            <div class="text-muted small">PO Number</div>
+                            <div class="fw-semibold">@Model.LinkedPurchaseOrder.PoNumber</div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Vendor</div>
+                            <div class="fw-semibold">@Model.LinkedPurchaseOrder.Vendor.CompanyName</div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Order Date</div>
+                            <div class="fw-semibold">@Model.LinkedPurchaseOrder.OrderDate.ToString("dd MMM yyyy")</div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Status</div>
+                            <div class="fw-semibold">@Model.LinkedPurchaseOrder.Status</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

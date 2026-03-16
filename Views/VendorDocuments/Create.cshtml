@@ -1,0 +1,60 @@
+@model AssetTracker.Models.Vendors.ViewModels.VendorDocumentCreateVm
+
+@{
+    ViewData["Title"] = "Add Vendor Document";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0">Add Vendor Document</h1>
+                <p class="text-muted mb-0 small">@ViewData["VendorLabel"]</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <input asp-for="VendorId" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="DocumentName" class="form-label">Document Name</label>
+                            <input asp-for="DocumentName" class="form-control" />
+                            <span asp-validation-for="DocumentName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DocumentType" class="form-label">Document Type</label>
+                            <input asp-for="DocumentType" class="form-control" placeholder="Contract, Quote, Receipt..." />
+                            <span asp-validation-for="DocumentType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Upload File</label>
+                            <input name="upload" type="file" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FilePath" class="form-label">File Path (Optional)</label>
+                            <input asp-for="FilePath" class="form-control" />
+                            <span asp-validation-for="FilePath" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save Document</button>
+                        <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.VendorId" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

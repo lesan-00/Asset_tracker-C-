@@ -1,0 +1,220 @@
+@model AssetTracker.Models.Procurement.ProcurementPipelineVm
+
+@{
+    ViewData["Title"] = "Purchase Requests";
+}
+
+<style>
+    .procurement-kpi-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .procurement-kpi-link .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .procurement-kpi-link:hover .card,
+    .procurement-kpi-link:focus-visible .card {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .08) !important;
+        cursor: pointer;
+    }
+</style>
+
+<nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Procurement</li>
+        <li class="breadcrumb-item active" aria-current="page">Purchase Requests</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Purchase Requests</h1>
+        <p class="text-muted mb-0">Track request-to-order-to-invoice flow across procurement documents.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Export" asp-route-filter="@Model.ActiveFilter" asp-route-q="@Model.Query" class="btn btn-outline-secondary">Export</a>
+        <a asp-controller="PurchaseRequests" asp-action="Create" class="btn btn-primary">+ New PR</a>
+    </div>
+</div>
+
+@if (TempData["PrSuccess"] is string prSuccess)
+{
+    <div class="alert alert-success">@prSuccess</div>
+}
+@if (TempData["PrError"] is string prError)
+{
+    <div class="alert alert-warning">@prError</div>
+}
+
+<div class="row g-3 mb-4 procurement-steps">
+    @foreach (var step in Model.StepCards)
+    {
+        var stepController = step.StepNumber switch
+        {
+            1 => "PurchaseRequests",
+            2 => "PurchaseOrders",
+            3 => "VendorInvoices",
+            _ => "Procurement"
+        };
+        var stepAction = step.StepNumber switch
+        {
+            1 => "Index",
+            2 => "Index",
+            3 => "Index",
+            _ => "Requests"
+        };
+        var stepLabel = $"Open {step.Title} list";
+
+        <div class="col-12 col-lg-4">
+            <a asp-controller="@stepController"
+               asp-action="@stepAction"
+               class="procurement-kpi-link"
+               aria-label="@stepLabel">
+                <div class="card shadow-sm border-0 h-100 procurement-step-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div class="text-muted small">Step @step.StepNumber</div>
+                                <h2 class="h6 mb-1">@step.Title</h2>
+                                <div class="text-muted small">@step.Subtitle</div>
+                            </div>
+                            <span class="procurement-step-icon"><i class="@step.Icon"></i></span>
+                        </div>
+                        <div class="h4 mb-1">@step.Count</div>
+                        <div class="text-muted small">Latest: @(string.IsNullOrWhiteSpace(step.LatestDocumentNumber) ? "No records" : step.LatestDocumentNumber)</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <a asp-controller="PurchaseRequests"
+           asp-action="Index"
+           asp-route-status="PendingApproval"
+           class="procurement-kpi-link"
+           aria-label="Open pending approval purchase requests">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Pending Approval PRs</div>
+                    <div class="h4 mb-0">@Model.PendingPrCount</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-4">
+        <a asp-controller="PurchaseOrders"
+           asp-action="Index"
+           asp-route-open="true"
+           class="procurement-kpi-link"
+           aria-label="Open purchase orders">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Open Purchase Orders</div>
+                    <div class="h4 mb-0">@Model.OpenPoCount</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-4">
+        <a asp-controller="VendorInvoices"
+           asp-action="Index"
+           asp-route-status="Pending"
+           class="procurement-kpi-link"
+           aria-label="Open pending invoices">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Pending Invoices</div>
+                    <div class="h4 mb-0">@Model.PendingInvoiceCount</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body border-bottom">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var tab in Model.FilterTabs)
+                {
+                    var tabClass = tab.IsActive ? "btn btn-primary btn-sm" : "btn btn-outline-secondary btn-sm";
+                    <a asp-action="Requests" asp-route-filter="@tab.Key" asp-route-q="@Model.Query" class="@tabClass">
+                        @tab.Label <span class="badge text-bg-light ms-1">@tab.Count</span>
+                    </a>
+                }
+            </div>
+            <form asp-action="Requests" method="get" class="d-flex gap-2">
+                <input type="hidden" name="filter" value="@Model.ActiveFilter" />
+                <input type="search" name="q" value="@Model.Query" class="form-control form-control-sm" placeholder="Search documents..." />
+                <button type="submit" class="btn btn-outline-primary btn-sm">Search</button>
+                <a asp-action="Requests" asp-route-filter="@Model.ActiveFilter" class="btn btn-outline-secondary btn-sm">Clear</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Document Type</th>
+                    <th>Document Number</th>
+                    <th>Date</th>
+                    <th>Vendor / Requester</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount</th>
+                    <th>Linked Document</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.UnifiedDocuments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No procurement documents found for the selected filters.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var doc in Model.UnifiedDocuments)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge @(doc.DocumentTypeKey switch { "pr" => "text-bg-info", "po" => "text-bg-primary", "invoice" => "text-bg-secondary", _ => "text-bg-light" })">
+                                    @doc.DocumentTypeLabel
+                                </span>
+                            </td>
+                            <td class="fw-semibold">@doc.DocumentNumber</td>
+                            <td>@doc.DocumentDate.ToString("dd MMM yyyy")</td>
+                            <td>@doc.VendorOrRequester</td>
+                            <td><span class="badge @doc.StatusBadgeClass">@doc.StatusLabel</span></td>
+                            <td class="text-end">@(doc.Amount.HasValue ? $"{doc.Currency} {doc.Amount.Value:N2}" : "-")</td>
+                            <td>@doc.LinkedDocument</td>
+                            <td class="text-end">
+                                @if (doc.DocumentTypeKey == "pr")
+                                {
+                                    <a asp-controller="PurchaseRequests" asp-action="Details" asp-route-id="@doc.DocumentId" class="btn btn-sm btn-outline-secondary">View</a>
+                                }
+                                else if (doc.DocumentTypeKey == "po")
+                                {
+                                    <a asp-controller="PurchaseOrders" asp-action="Details" asp-route-id="@doc.DocumentId" class="btn btn-sm btn-outline-secondary">View</a>
+                                }
+                                else if (doc.DocumentTypeKey == "invoice")
+                                {
+                                    <a asp-controller="VendorInvoices" asp-action="Details" asp-route-id="@doc.DocumentId" class="btn btn-sm btn-outline-secondary">View</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

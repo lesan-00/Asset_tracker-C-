@@ -20,6 +20,12 @@ public class StaffProfile
     [StringLength(100)]
     public string Department { get; set; } = string.Empty;
 
+    [StringLength(120)]
+    public string Designation { get; set; } = string.Empty;
+
+    [StringLength(120)]
+    public string? Location { get; set; }
+
     [StringLength(30)]
     public string PhoneNumber { get; set; } = string.Empty;
 

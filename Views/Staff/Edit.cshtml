@@ -32,10 +32,20 @@
                             <input asp-for="EmployeeNumber" class="form-control" />
                             <span asp-validation-for="EmployeeNumber" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label asp-for="Department" class="form-label"></label>
                             <input asp-for="Department" class="form-control" />
                             <span asp-validation-for="Department" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Designation" class="form-label">Designation</label>
+                            <input asp-for="Designation" class="form-control" />
+                            <span asp-validation-for="Designation" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Location" class="form-label">Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="Enter work location" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="PhoneNumber" class="form-label"></label>

@@ -26,6 +26,12 @@
             <dt class="col-sm-3">Department</dt>
             <dd class="col-sm-9">@Model.Department</dd>
 
+            <dt class="col-sm-3">Designation</dt>
+            <dd class="col-sm-9">@Model.Designation</dd>
+
+            <dt class="col-sm-3">Location</dt>
+            <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Location) ? "-" : Model.Location)</dd>
+
             <dt class="col-sm-3">Phone Number</dt>
             <dd class="col-sm-9">@Model.PhoneNumber</dd>
 

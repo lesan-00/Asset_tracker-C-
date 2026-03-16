@@ -1,0 +1,84 @@
+@model AssetTracker.Models.Vendors.ViewModels.PurchaseOrderCreateVm
+
+@{
+    ViewData["Title"] = "New Purchase Order";
+    var allowBlacklisted = (ViewData["AllowBlacklisted"] as bool?) ?? false;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0">New Purchase Order</h1>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <input type="hidden" name="allowBlacklisted" value="@(allowBlacklisted ? "true" : "false")" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="VendorId" class="form-label">Vendor</label>
+                            <select asp-for="VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor..." asp-items="ViewBag.VendorId">
+                                <option value="">Select vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="OrderDate" class="form-label">Order Date</label>
+                            <input asp-for="OrderDate" type="date" class="form-control" />
+                            <span asp-validation-for="OrderDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.PurchaseOrderStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ItemName" class="form-label">Item Description</label>
+                            <input asp-for="ItemName" class="form-control" />
+                            <span asp-validation-for="ItemName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Quantity" class="form-label">Quantity</label>
+                            <input asp-for="Quantity" class="form-control" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="UnitPrice" class="form-label">Unit Price</label>
+                            <input asp-for="UnitPrice" class="form-control" />
+                            <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="TotalAmount" class="form-label">Total Amount</label>
+                            <input asp-for="TotalAmount" class="form-control" />
+                            <div class="form-text">Leave 0 to auto-calculate from quantity x unit price.</div>
+                            <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Currency" class="form-label">Currency</label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save PO</button>
+                        <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.VendorId" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

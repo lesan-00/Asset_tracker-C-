@@ -166,7 +166,7 @@ public class IssuesController : Controller
             invalidVm.ResolvedCount = await _context.Issues
                 .AsNoTracking()
                 .CountAsync(i => i.Status == IssueStatus.Resolved);
-            return View(nameof(Index), invalidVm);
+            return RedirectToAction(nameof(Index), new { openCreate = true });
         }
 
         var issue = new Issue
@@ -212,7 +212,7 @@ public class IssuesController : Controller
             failedVm.ResolvedCount = await _context.Issues
                 .AsNoTracking()
                 .CountAsync(i => i.Status == IssueStatus.Resolved);
-            return View(nameof(Index), failedVm);
+            return RedirectToAction(nameof(Index), new { openCreate = true });
         }
 
         if (IsAjaxRequest())
@@ -304,7 +304,7 @@ public class IssuesController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateAdminEditDropDownsAsync(vm.AssetId, vm.AssignedToUserId);
-            return View(vm);
+            return RedirectToAction(nameof(Edit), new { id = vm.Id });
         }
 
         var issue = await _context.Issues.FirstOrDefaultAsync(i => i.Id == id);
@@ -333,7 +333,7 @@ public class IssuesController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateAdminEditDropDownsAsync(vm.AssetId, vm.AssignedToUserId);
-            return View(vm);
+            return RedirectToAction(nameof(Edit), new { id = vm.Id });
         }
 
         issue.AssetId = vm.AssetId;
@@ -352,7 +352,7 @@ public class IssuesController : Controller
             _logger.LogError(ex, "Issue edit failed for issue {IssueId}.", id);
             ModelState.AddModelError(string.Empty, "Unable to save changes right now. Please try again.");
             await PopulateAdminEditDropDownsAsync(vm.AssetId, vm.AssignedToUserId);
-            return View(vm);
+            return RedirectToAction(nameof(Edit), new { id = vm.Id });
         }
 
         return RedirectToAction(nameof(Details), new { id = issue.Id });

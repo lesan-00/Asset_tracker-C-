@@ -1,0 +1,38 @@
+@model AssetTracker.Models.Vendors.VendorInvoice
+
+@{
+    ViewData["Title"] = "Delete Invoice";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0">Delete Invoice</h1>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    Delete invoice <strong>@Model.InvoiceNumber</strong> for vendor
+                    <strong>@Model.Vendor.CompanyName</strong>?
+                </p>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Invoice Date</dt>
+                    <dd class="col-sm-8">@Model.InvoiceDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-4">Due Date</dt>
+                    <dd class="col-sm-8">@Model.DueDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">@Model.PaymentStatus</dd>
+                    <dt class="col-sm-4">Amount</dt>
+                    <dd class="col-sm-8">@Model.Currency @Model.Amount.ToString("N2")</dd>
+                </dl>
+
+                <form method="post" asp-controller="VendorInvoices" asp-action="Delete" asp-route-id="@Model.Id">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Invoice</button>
+                    <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.VendorId" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

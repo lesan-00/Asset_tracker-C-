@@ -18,6 +18,8 @@
                     <th>Email</th>
                     <th>Employee Number</th>
                     <th>Department</th>
+                    <th>Designation</th>
+                    <th>Location</th>
                     <th>Phone</th>
                     <th class="text-end">Actions</th>
                 </tr>
@@ -30,6 +32,8 @@
                     <td>@(item.User?.Email ?? "-")</td>
                     <td>@item.EmployeeNumber</td>
                     <td>@item.Department</td>
+                    <td>@item.Designation</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Location) ? "-" : item.Location)</td>
                     <td>@item.PhoneNumber</td>
                     <td class="text-end">
                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>

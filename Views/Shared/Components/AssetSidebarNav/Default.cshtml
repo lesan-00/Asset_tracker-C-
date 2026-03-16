@@ -1,0 +1,28 @@
+@model AssetTracker.Models.Assets.AssetSidebarNavVm
+
+<li class="nav-item sidebar-assets">
+    <div class="sidebar-assets-parent @(Model.IsActive ? "active" : string.Empty)">
+        <a class="nav-link flex-grow-1" asp-controller="Assets" asp-action="Index">
+            <i class="bi bi-box-seam me-2"></i>
+            <span class="sidebar-link-label">Assets</span>
+            <span class="badge sidebar-assets-badge ms-auto">@Model.TotalCount</span>
+        </a>
+        <button type="button"
+                class="btn btn-link p-0 sidebar-assets-toggle @(Model.IsExpanded ? string.Empty : "collapsed")"
+                data-bs-toggle="collapse"
+                data-bs-target="#sidebarAssetsTree"
+                aria-expanded="@(Model.IsExpanded ? "true" : "false")"
+                aria-controls="sidebarAssetsTree">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="collapse sidebar-assets-tree @(Model.IsExpanded ? "show" : string.Empty)" id="sidebarAssetsTree">
+        <ul class="list-unstyled mb-0 ps-2">
+            @foreach (var node in Model.Nodes)
+            {
+                <partial name="~/Views/Shared/_SidebarAssetNode.cshtml" model="node" />
+            }
+        </ul>
+    </div>
+</li>

@@ -127,6 +127,46 @@
 
     <div class="card shadow-sm report-card">
         <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="report-icon">E</span>
+                        <h2 class="h5 mb-0">Procurement Reports</h2>
+                    </div>
+                    <p class="text-secondary mb-0">Analyze PR, PO, and invoice activity with spend, approval, and conversion insights.</p>
+                </div>
+                <div class="d-flex gap-2 align-self-start">
+                    <button type="submit" form="procurementForm" formaction="@Url.Action("ProcurementView","Reports")" class="btn btn-outline-secondary">View</button>
+                    <button type="submit" form="procurementForm" formaction="@Url.Action("ProcurementExcel","Reports")" class="btn btn-outline-secondary">Excel</button>
+                    <button type="submit" form="procurementForm" formaction="@Url.Action("ProcurementPdf","Reports")" class="btn btn-outline-secondary">PDF</button>
+                </div>
+            </div>
+
+            <form id="procurementForm" method="get" class="row g-2">
+                <div class="col-12 col-lg-3">
+                    <select asp-for="ProcurementReportType" name="reportType" class="form-select" asp-items="Model.ProcurementReportOptions"></select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <input type="date" name="from" value="@Model.ProcurementFrom?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-6 col-lg-2">
+                    <input type="date" name="to" value="@Model.ProcurementTo?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-12 col-lg-2">
+                    <select asp-for="ProcurementVendorId" name="vendorId" class="form-select" asp-items="Model.ProcurementVendorOptions"></select>
+                </div>
+                <div class="col-6 col-lg-1">
+                    <input type="text" name="department" value="@Model.ProcurementDepartment" class="form-control" placeholder="Dept" />
+                </div>
+                <div class="col-6 col-lg-2">
+                    <input type="text" name="search" value="@Model.ProcurementSearch" class="form-control" placeholder="Search..." />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm report-card">
+        <div class="card-body p-4">
             <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-2">

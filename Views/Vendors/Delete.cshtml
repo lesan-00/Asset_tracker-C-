@@ -1,0 +1,54 @@
+@model AssetTracker.Models.Vendors.Vendor
+
+@{
+    ViewData["Title"] = "Archive Vendor";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0">Archive Vendor</h1>
+            </div>
+            <div class="card-body">
+                @if (Model.IsArchived)
+                {
+                    <div class="alert alert-secondary mb-3">
+                        This vendor is already archived.
+                        @(Model.ArchivedAt.HasValue ? $"Archived at {Model.ArchivedAt.Value:dd MMM yyyy, HH:mm}." : string.Empty)
+                    </div>
+                    <form asp-action="Restore" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success">Restore Vendor</button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary ms-2">Back</a>
+                    </form>
+                }
+                else
+                {
+                    <p class="mb-3">
+                        Archive vendor <strong>@Model.CompanyName</strong> (@Model.VendorCode)?
+                        This hides the vendor from default lists but preserves all linked history.
+                    </p>
+                    <dl class="row">
+                        <dt class="col-sm-4">Category</dt>
+                        <dd class="col-sm-8">@Model.Category</dd>
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">@Model.Status</dd>
+                        <dt class="col-sm-4">Preferred</dt>
+                        <dd class="col-sm-8">@(Model.IsPreferredVendor ? "Yes" : "No")</dd>
+                    </dl>
+                    <form asp-action="ArchiveConfirmed" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <div class="mb-3">
+                            <label for="archiveReason" class="form-label">Archive Reason (optional)</label>
+                            <textarea class="form-control" id="archiveReason" name="archiveReason" rows="3" placeholder="Reason for archiving this vendor"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Archive Vendor</button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary ms-2">Cancel</a>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

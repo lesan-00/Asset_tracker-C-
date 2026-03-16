@@ -1,0 +1,124 @@
+@model AssetTracker.Models.Vendors.PurchaseOrder
+
+@{
+    ViewData["Title"] = "Purchase Order Details";
+
+    static string StatusBadge(AssetTracker.Models.Vendors.PurchaseOrderStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Draft => "text-bg-secondary",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Submitted => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Invoiced => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Paid => "text-bg-success",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Closed => "text-bg-info",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Cancelled => "text-bg-danger",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Approved => "text-bg-primary",
+        AssetTracker.Models.Vendors.PurchaseOrderStatus.Received => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.PoNumber</h1>
+        <p class="text-muted mb-0">Purchase order details and linked procurement flow.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Purchase Orders</a>
+        <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.VendorId" class="btn btn-outline-primary">Vendor</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Order Information</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">PO Number</dt><dd class="col-sm-7">@Model.PoNumber</dd>
+                    <dt class="col-sm-5">Vendor</dt><dd class="col-sm-7">@Model.Vendor.CompanyName</dd>
+                    <dt class="col-sm-5">Order Date</dt><dd class="col-sm-7">@Model.OrderDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-5">Status</dt><dd class="col-sm-7"><span class="badge @StatusBadge(Model.Status)">@Model.Status</span></dd>
+                    <dt class="col-sm-5">Amount</dt><dd class="col-sm-7">@Model.Currency @Model.TotalAmount.ToString("N2")</dd>
+                    <dt class="col-sm-5">Linked PR</dt><dd class="col-sm-7">@(Model.PurchaseRequest?.PrNumber ?? "-")</dd>
+                    <dt class="col-sm-5">Notes</dt><dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Notes) ? "Not provided" : Model.Notes)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Line Items</h2></div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Lines.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-3">No line items.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var line in Model.Lines)
+                            {
+                                <tr>
+                                    <td>@line.ItemName</td>
+                                    <td class="text-end">@line.Quantity</td>
+                                    <td class="text-end">@Model.Currency @line.UnitPrice.ToString("N2")</td>
+                                    <td class="text-end">@Model.Currency @line.LineTotal.ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-header bg-white"><h2 class="h6 mb-0">Linked Invoices</h2></div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Invoices.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-3">No linked invoices.</td></tr>
+                }
+                else
+                {
+                    @foreach (var invoice in Model.Invoices.OrderByDescending(i => i.InvoiceDate))
+                    {
+                        <tr>
+                            <td>@invoice.InvoiceNumber</td>
+                            <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                            <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
+                            <td>@invoice.PaymentStatus</td>
+                            <td class="text-end">@invoice.Currency @invoice.Amount.ToString("N2")</td>
+                            <td class="text-end">
+                                <a asp-controller="VendorInvoices" asp-action="Details" asp-route-id="@invoice.Id" class="btn btn-sm btn-outline-secondary">Invoice</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

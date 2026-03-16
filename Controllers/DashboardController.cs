@@ -25,6 +25,7 @@ public class DashboardController : Controller
         var inStock = await _context.Assets.AsNoTracking().CountAsync(a => a.Status == AssetStatus.InStock);
         var assigned = await _context.Assets.AsNoTracking().CountAsync(a => a.Status == AssetStatus.Assigned);
         var inRepair = await _context.Assets.AsNoTracking().CountAsync(a => a.Status == AssetStatus.InRepair);
+        var retired = await _context.Assets.AsNoTracking().CountAsync(a => a.Status == AssetStatus.Retired);
 
         var openIssuesQuery = _context.Issues
             .AsNoTracking()
@@ -134,6 +135,7 @@ public class DashboardController : Controller
             InStock = inStock,
             Assigned = assigned,
             InRepair = inRepair,
+            Retired = retired,
             OpenIssues = openIssues,
             CriticalIssues = criticalIssues,
             AllocationByDepartment = allocation,

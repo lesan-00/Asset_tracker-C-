@@ -1,51 +1,495 @@
-@model AssetTracker.Models.Asset
+@model AssetTracker.Models.Assets.AssetDetailsVm
 
 @{
     ViewData["Title"] = "Asset Details";
+
+    static string NotProvided(string? value) => string.IsNullOrWhiteSpace(value) ? "Not provided" : value;
+    static string DateOrDefault(DateTime? value, string fallback = "Not provided") => value.HasValue ? value.Value.ToString("dd MMM yyyy") : fallback;
+    static string DateTimeOrDefault(DateTime? value, string fallback = "Not provided") => value.HasValue ? value.Value.ToString("dd MMM yyyy, HH:mm") : fallback;
+
+    static string? ResolveSoftwareEditAction(AssetTracker.Models.Asset asset)
+    {
+        var category = asset.SoftwareCategory?.ToString() switch
+        {
+            "LicensedApplications" => "licensed-applications",
+            "OperatingSystems" => "operating-systems",
+            "Subscriptions" => "subscriptions",
+            "OpenSource" => "open-source",
+            _ => asset.Category
+        };
+
+        return category?.ToLowerInvariant() switch
+        {
+            "licensed-applications" => "EditLicensedApplication",
+            "operating-systems" => "EditOperatingSystem",
+            "subscriptions" => "EditSubscription",
+            "open-source" => "EditOpenSource",
+            _ => null
+        };
+    }
+
+    static string SoftwareStatusClass(AssetTracker.Models.SoftwareStatus? status) => status switch
+    {
+        AssetTracker.Models.SoftwareStatus.Active => "text-bg-success",
+        AssetTracker.Models.SoftwareStatus.PendingRenewal => "text-bg-warning",
+        AssetTracker.Models.SoftwareStatus.Expired => "text-bg-danger",
+        AssetTracker.Models.SoftwareStatus.Suspended => "text-bg-secondary",
+        AssetTracker.Models.SoftwareStatus.Trial => "text-bg-info",
+        AssetTracker.Models.SoftwareStatus.Revoked => "text-bg-dark",
+        AssetTracker.Models.SoftwareStatus.Retired => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+
+    var isSoftware = Model.Asset.AssetType == AssetTracker.Models.AssetType.Software || Model.Asset.SoftwareCategory.HasValue || string.Equals(Model.Asset.TopLevelCategory, "software", StringComparison.OrdinalIgnoreCase);
+    var softwareCategory = Model.Asset.SoftwareCategory
+        ?? (Model.Asset.Category?.ToLowerInvariant() switch
+        {
+            "licensed-applications" => AssetTracker.Models.SoftwareCategory.LicensedApplications,
+            "operating-systems" => AssetTracker.Models.SoftwareCategory.OperatingSystems,
+            "subscriptions" => AssetTracker.Models.SoftwareCategory.Subscriptions,
+            "open-source" => AssetTracker.Models.SoftwareCategory.OpenSource,
+            _ => null
+        });
+    var isPhysical = !isSoftware && (
+        string.Equals(Model.Asset.TopLevelCategory, "physical", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.Category, "furniture", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.Category, "fixtures", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.Category, "vehicles", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.SubCategory, "desks", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.SubCategory, "chairs", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Asset.SubCategory, "cabinets", StringComparison.OrdinalIgnoreCase));
+    var editAction = isSoftware ? ResolveSoftwareEditAction(Model.Asset) : "Edit";
+    var isRetired = Model.Asset.Status == AssetTracker.Models.AssetStatus.Retired
+                    || Model.Asset.SoftwareStatus == AssetTracker.Models.SoftwareStatus.Retired;
 }
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h1 class="h4 mb-0">Asset Details</h1>
-        <div class="d-flex gap-2">
-            @if (User.IsInRole("Admin"))
-            {
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Edit</a>
-            }
-            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back to List</a>
-        </div>
+@if (TempData["AssetSuccess"] is string successMessage)
+{
+    <div class="alert alert-success mb-3" role="alert">@successMessage</div>
+}
+
+@if (TempData["AssetError"] is string errorMessage)
+{
+    <div class="alert alert-warning mb-3" role="alert">@errorMessage</div>
+}
+
+@if (Model.HasActiveAssignment)
+{
+    <div class="alert alert-info mb-3" role="alert">
+        This asset is currently assigned and cannot be retired until it is returned or unassigned.
     </div>
-    <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Asset Tag</dt>
-            <dd class="col-sm-9">@Model.AssetTag</dd>
+}
 
-            <dt class="col-sm-3">Asset Type</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(m => m.AssetType)</dd>
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Asset Details</h1>
+        <p class="text-muted mb-0">View key specifications, status, and lifecycle milestones.</p>
+        @if (isRetired)
+        {
+            <span class="badge text-bg-dark mt-2">Retired</span>
+        }
+    </div>
+    <div class="d-flex gap-2">
+        @if (User.IsInRole("Admin"))
+        {
+            if (!string.IsNullOrWhiteSpace(editAction))
+            {
+                <a asp-action="@editAction" asp-route-id="@Model.Asset.Id" class="btn btn-primary">Edit</a>
+            }
 
-            <dt class="col-sm-3">Brand</dt>
-            <dd class="col-sm-9">@Model.Brand</dd>
-
-            <dt class="col-sm-3">Model</dt>
-            <dd class="col-sm-9">@Model.Model</dd>
-
-            <dt class="col-sm-3">Serial Number</dt>
-            <dd class="col-sm-9">@Model.SerialNumber</dd>
-
-            <dt class="col-sm-3">Status</dt>
-            <dd class="col-sm-9">@Model.Status</dd>
-
-            <dt class="col-sm-3">Location</dt>
-            <dd class="col-sm-9">@Model.Location</dd>
-
-            <dt class="col-sm-3">Condition</dt>
-            <dd class="col-sm-9">@Model.Condition</dd>
-
-            <dt class="col-sm-3">Specifications</dt>
-            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Specifications) ? Model.Specifications : "-")</dd>
-
-            <dt class="col-sm-3">Created At</dt>
-            <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
-        </dl>
+            if (!isRetired && !Model.HasActiveAssignment)
+            {
+                <form asp-action="Retire" asp-route-id="@Model.Asset.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-dark">Retire Asset</button>
+                </form>
+            }
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        @if (User.IsInRole("Admin") && isRetired)
+        {
+            <a asp-action="Delete" asp-route-id="@Model.Asset.Id" class="btn btn-outline-danger">Delete Permanently</a>
+        }
     </div>
 </div>
+
+@if (isSoftware)
+{
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Software Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-muted small">Asset Tag</div>
+                            <div class="fw-semibold">@NotProvided(Model.Asset.AssetTag)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Name</div>
+                            <div class="fw-semibold">@NotProvided(Model.Asset.SoftwareName ?? Model.Asset.Model)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Software Category</div>
+                            <div class="fw-semibold">@NotProvided(Model.Asset.Category)</div>
+                        </div>
+                        @if (softwareCategory == AssetTracker.Models.SoftwareCategory.Subscriptions)
+                        {
+                            <div class="col-md-4">
+                                <div class="text-muted small">Plan / Tier</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.PlanOrTier)</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-4">
+                                <div class="text-muted small">Version</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.SoftwareVersion)</div>
+                            </div>
+                        }
+                        <div class="col-md-4">
+                            <div class="text-muted small">Status</div>
+                            <span class="badge @SoftwareStatusClass(Model.Asset.SoftwareStatus) rounded-pill">@((Model.Asset.SoftwareStatus?.ToString()) ?? "Not set")</span>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small">Created At</div>
+                            <div class="fw-semibold">@Model.Asset.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0">Licensing Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @if (softwareCategory == AssetTracker.Models.SoftwareCategory.OpenSource)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Open Source License</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.OpenSourceLicenseType)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Maintainer / Vendor</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.MaintainerOrVendor)</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">License Type</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.LicenseType)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">License Key</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.LicenseKey)</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0">Assignment and Installation</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Assigned To</div>
+                            <div class="fw-semibold">@NotProvided(Model.Asset.AssignedToUserOrDepartment)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Installed Date</div>
+                            <div class="fw-semibold">@(Model.Asset.InstalledDate?.ToString("dd MMM yyyy") ?? NotProvided(Model.Asset.InstalledOn))</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Location</div>
+                            <div class="fw-semibold">@NotProvided(Model.Asset.Location)</div>
+                        </div>
+                        @if (softwareCategory == AssetTracker.Models.SoftwareCategory.OpenSource)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Deployment Environment</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.DeploymentEnvironment?.ToString())</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Security Status</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.SecurityStatus)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Last Updated Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.LastUpdatedDate)</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0">Lifecycle Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @if (softwareCategory == AssetTracker.Models.SoftwareCategory.OperatingSystems)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Purchase Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.PurchaseDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Support End Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.SupportEndDate)</div>
+                            </div>
+                        }
+                        else if (softwareCategory == AssetTracker.Models.SoftwareCategory.Subscriptions)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Start Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.StartDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Expiry Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.ExpiryDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Renewal Reminder Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.RenewalReminderDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Auto Renew</div>
+                                <div class="fw-semibold">@(Model.Asset.AutoRenew ? "Yes" : "No")</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Purchase Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.PurchaseDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Expiry Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.ExpiryDate)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Renewal Reminder Date</div>
+                                <div class="fw-semibold">@DateOrDefault(Model.Asset.RenewalReminderDate)</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0">Financial Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Cost</div>
+                            <div class="fw-semibold">@((Model.Asset.Cost.HasValue ? $"{Model.Asset.Currency} {Model.Asset.Cost.Value:N2}" : "Not provided"))</div>
+                        </div>
+                        @if (softwareCategory == AssetTracker.Models.SoftwareCategory.Subscriptions)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Plan / Tier</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.PlanOrTier)</div>
+                            </div>
+                        }
+                        @if (softwareCategory != AssetTracker.Models.SoftwareCategory.OpenSource)
+                        {
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Invoice Reference</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.InvoiceReference)</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Purchase Order Reference</div>
+                                <div class="fw-semibold">@NotProvided(Model.Asset.PurchaseOrderReference)</div>
+                            </div>
+                        }
+                        <div class="col-sm-12">
+                            <div class="text-muted small">Vendor</div>
+                            <div class="fw-semibold">
+                                @if (Model.Asset.VendorId.HasValue && Model.Asset.Vendor is not null)
+                                {
+                                    <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.Asset.VendorId" class="text-decoration-none">@Model.Asset.Vendor.CompanyName (@Model.Asset.Vendor.VendorCode)</a>
+                                }
+                                else
+                                {
+                                    <span>Not provided</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h2 class="h6 mb-0">Additional Notes</h2>
+                </div>
+                <div class="card-body">
+                    @if (string.IsNullOrWhiteSpace(Model.Asset.SoftwareNotes))
+                    {
+                        <span class="text-muted">Not provided</span>
+                    }
+                    else
+                    {
+                        @Model.Asset.SoftwareNotes
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    var statusBadgeClass = Model.Asset.Status switch
+    {
+        AssetTracker.Models.AssetStatus.InStock => "text-bg-success",
+        AssetTracker.Models.AssetStatus.Assigned => "text-bg-primary",
+        AssetTracker.Models.AssetStatus.InRepair => "text-bg-warning",
+        AssetTracker.Models.AssetStatus.Retired => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+
+    if (isPhysical)
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">Physical Asset Information</h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-12 col-md-6">
+                        <div class="text-muted small">Asset Tag</div>
+                        <div class="fw-semibold">@NotProvided(Model.Asset.AssetTag)</div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="text-muted small">Asset Type</div>
+                        <div class="fw-semibold">@Html.DisplayFor(m => m.Asset.AssetType)</div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="text-muted small">Status</div>
+                        <span class="badge @statusBadgeClass rounded-pill">@Model.Asset.Status</span>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="text-muted small">Location</div>
+                        <div class="fw-semibold">@NotProvided(Model.Asset.Location)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        var statusText = Model.Asset.Status switch
+        {
+            AssetTracker.Models.AssetStatus.InStock => "In Stock",
+            AssetTracker.Models.AssetStatus.Assigned => "Assigned",
+            AssetTracker.Models.AssetStatus.InRepair => "In Repair",
+            AssetTracker.Models.AssetStatus.Retired => "Retired",
+            _ => Model.Asset.Status.ToString()
+        };
+
+        var conditionLabel = NotProvided(Model.Asset.Condition).ToUpperInvariant();
+        var conditionBadgeClass = conditionLabel switch
+        {
+            "GOOD" => "text-bg-success",
+            "FAIR" => "text-bg-warning",
+            "DAMAGED" => "text-bg-danger",
+            "EXCELLENT" => "text-bg-info",
+            _ => "text-bg-secondary"
+        };
+
+        var brandModel = $"{NotProvided(Model.Asset.Brand)} / {NotProvided(Model.Asset.Model)}";
+        var issueDateText = Model.IssueDate.HasValue ? Model.IssueDate.Value.ToString("dd MMM yyyy") : "Not issued";
+        var returnedDateText = Model.ReturnedDate.HasValue ? Model.ReturnedDate.Value.ToString("dd MMM yyyy") : "Not returned";
+        var currentUserText = string.IsNullOrWhiteSpace(Model.CurrentUser) ? "Unassigned" : Model.CurrentUser;
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white"><h2 class="h5 mb-0">Asset Overview</h2></div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-6 col-lg-3"><div class="text-muted small">Asset Tag</div><div class="fw-semibold">@NotProvided(Model.Asset.AssetTag)</div></div>
+                    <div class="col-6 col-lg-3"><div class="text-muted small">Asset Type</div><div class="fw-semibold">@Html.DisplayFor(m => m.Asset.AssetType)</div></div>
+                    <div class="col-12 col-lg-3"><div class="text-muted small">Brand / Model</div><div class="fw-semibold">@brandModel</div></div>
+                    <div class="col-6 col-lg-3"><div class="text-muted small">Current Status</div><span class="badge @statusBadgeClass rounded-pill">@statusText</span></div>
+                    <div class="col-6 col-lg-3"><div class="text-muted small">Condition</div><span class="badge @conditionBadgeClass rounded-pill">@conditionLabel</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white"><h2 class="h6 mb-0">Asset Information</h2></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Serial Number</div><div class="fw-semibold">@NotProvided(Model.Asset.SerialNumber)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Location</div><div class="fw-semibold">@NotProvided(Model.Asset.Location)</div></div>
+                            <div class="col-sm-6">
+                                <div class="text-muted small">Vendor</div>
+                                <div class="fw-semibold">
+                                    @if (Model.Asset.VendorId.HasValue && Model.Asset.Vendor is not null)
+                                    {
+                                        <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.Asset.VendorId" class="text-decoration-none">@Model.Asset.Vendor.CompanyName (@Model.Asset.Vendor.VendorCode)</a>
+                                    }
+                                    else
+                                    {
+                                        <span>Not provided</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-sm-6"><div class="text-muted small">Condition</div><div class="fw-semibold">@NotProvided(Model.Asset.Condition)</div></div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="text-muted small mb-2">Specifications</div>
+                            <div class="border rounded-3 p-3 bg-light-subtle">
+                                @if (string.IsNullOrWhiteSpace(Model.Asset.Specifications))
+                                {
+                                    <span class="text-muted">Not provided</span>
+                                }
+                                else
+                                {
+                                    @Model.Asset.Specifications
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white"><h2 class="h6 mb-0">Lifecycle Information</h2></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Purchase Date</div><div class="fw-semibold">@DateOrDefault(Model.Asset.PurchaseDate)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Warranty End Date</div><div class="fw-semibold">@DateOrDefault(Model.Asset.WarrantyEndDate)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Issue Date</div><div class="fw-semibold">@issueDateText</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Returned Date</div><div class="fw-semibold">@returnedDateText</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Current User</div><div class="fw-semibold">@currentUserText</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Created At</div><div class="fw-semibold">@DateTimeOrDefault(Model.Asset.CreatedAt)</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

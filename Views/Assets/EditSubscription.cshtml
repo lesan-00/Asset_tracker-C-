@@ -1,0 +1,137 @@
+@model AssetTracker.Models.Assets.EditSubscriptionVm
+
+@{
+    ViewData["Title"] = "Edit Subscription";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Edit Subscription</h1>
+                <p class="text-muted mb-0">Update subscription terms, billing cadence, and renewal data.</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditSubscription" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input asp-for="Id" type="hidden" />
+
+                    <h2 class="h6 text-muted mb-3">Subscription Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="AssetTag" class="form-label"></label>
+                            <input asp-for="AssetTag" class="form-control" />
+                            <span asp-validation-for="AssetTag" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PlanOrTier" class="form-label"></label>
+                            <input asp-for="PlanOrTier" class="form-control" />
+                            <span asp-validation-for="PlanOrTier" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="VendorId" class="form-label">Vendor</label>
+                            <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                <option value="">No vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BillingCycle" class="form-label"></label>
+                            <select asp-for="BillingCycle" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareBillingCycle>()" class="form-select"></select>
+                            <span asp-validation-for="BillingCycle" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Lifecycle and Assignment</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="StartDate" class="form-label"></label>
+                            <input asp-for="StartDate" type="date" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ExpiryDate" class="form-label"></label>
+                            <input asp-for="ExpiryDate" type="date" class="form-control" />
+                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="RenewalReminderDate" class="form-label"></label>
+                            <input asp-for="RenewalReminderDate" type="date" class="form-control" />
+                            <span asp-validation-for="RenewalReminderDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input asp-for="AutoRenew" class="form-check-input" />
+                                <label asp-for="AutoRenew" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AssignedToUserOrDepartment" class="form-label"></label>
+                            <input asp-for="AssignedToUserOrDepartment" class="form-control" />
+                            <span asp-validation-for="AssignedToUserOrDepartment" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InstalledOn" class="form-label"></label>
+                            <input asp-for="InstalledOn" class="form-control" />
+                            <span asp-validation-for="InstalledOn" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Location" class="form-label"></label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Financial Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="Cost" class="form-label"></label>
+                            <input asp-for="Cost" class="form-control" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Currency" class="form-label"></label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InvoiceReference" class="form-label"></label>
+                            <input asp-for="InvoiceReference" class="form-control" />
+                            <span asp-validation-for="InvoiceReference" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PurchaseOrderReference" class="form-label"></label>
+                            <input asp-for="PurchaseOrderReference" class="form-control" />
+                            <span asp-validation-for="PurchaseOrderReference" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

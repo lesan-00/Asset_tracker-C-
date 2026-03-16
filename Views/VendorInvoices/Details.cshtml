@@ -1,0 +1,86 @@
+@model AssetTracker.Models.Vendors.VendorInvoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+    var today = DateTime.UtcNow.Date;
+    var effectiveStatus = Model.PaymentStatus == AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending && Model.DueDate.Date < today
+        ? AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue
+        : Model.PaymentStatus;
+
+    static string StatusBadge(AssetTracker.Models.Vendors.InvoicePaymentStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending => "text-bg-warning",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Paid => "text-bg-success",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue => "text-bg-danger",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Cancelled => "text-bg-secondary",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.InvoiceNumber</h1>
+        <p class="text-muted mb-0">Invoice details and linked procurement documents.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Invoices</a>
+        <a asp-controller="Vendors" asp-action="Details" asp-route-id="@Model.VendorId" class="btn btn-outline-primary">Vendor</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-dark">Edit</a>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Invoice Information</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Invoice Number</dt><dd class="col-sm-7">@Model.InvoiceNumber</dd>
+                    <dt class="col-sm-5">Vendor</dt><dd class="col-sm-7">@Model.Vendor.CompanyName</dd>
+                    <dt class="col-sm-5">Invoice Date</dt><dd class="col-sm-7">@Model.InvoiceDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-5">Due Date</dt><dd class="col-sm-7">@Model.DueDate.ToString("dd MMM yyyy")</dd>
+                    <dt class="col-sm-5">Status</dt><dd class="col-sm-7"><span class="badge @StatusBadge(effectiveStatus)">@effectiveStatus</span></dd>
+                    <dt class="col-sm-5">Paid Date</dt><dd class="col-sm-7">@(Model.PaidDate.HasValue ? Model.PaidDate.Value.ToString("dd MMM yyyy") : "Not paid")</dd>
+                    <dt class="col-sm-5">Amount</dt><dd class="col-sm-7">@Model.Currency @Model.Amount.ToString("N2")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Linked Documents</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Purchase Order</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.PurchaseOrder is null)
+                        {
+                            <span>-</span>
+                        }
+                        else
+                        {
+                            <a asp-controller="PurchaseOrders" asp-action="Details" asp-route-id="@Model.PurchaseOrder.Id">@Model.PurchaseOrder.PoNumber</a>
+                        }
+                    </dd>
+                    <dt class="col-sm-5">Linked PR</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.PurchaseOrder?.PurchaseRequest is null)
+                        {
+                            <span>-</span>
+                        }
+                        else
+                        {
+                            <a asp-controller="PurchaseRequests" asp-action="Details" asp-route-id="@Model.PurchaseOrder.PurchaseRequest.Id">@Model.PurchaseOrder.PurchaseRequest.PrNumber</a>
+                        }
+                    </dd>
+                    <dt class="col-sm-5">Notes</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Notes) ? "Not provided" : Model.Notes)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

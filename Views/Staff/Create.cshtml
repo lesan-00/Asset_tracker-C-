@@ -34,10 +34,18 @@
         border-radius: 999px;
     }
 
-    .asset-panel {
-        border: 1px solid #e9ecef;
-        border-radius: 12px;
+    .section-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6c757d;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .readonly-field {
         background-color: #f8f9fa;
+        color: #495057;
     }
 </style>
 
@@ -57,63 +65,80 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-4"></div>
                     <input asp-for="UserId" type="hidden" />
 
-                    <div class="row">
-                        <div class="col-12 col-lg-6 pe-lg-4">
-                            <div class="mb-4">
-                                <label for="UserEmail" class="form-label field-label">Identity User (Email)</label>
-                                <input id="UserEmail"
-                                       name="userEmail"
-                                       type="email"
-                                       class="form-control"
-                                       value="@ViewData["SelectedUserEmail"]"
-                                       list="identity-users"
-                                       placeholder="Enter staff email" />
-                                <datalist id="identity-users">
-                                    @if (ViewData["UserEmails"] is IEnumerable<string> emails)
+                    <div class="section-title">Basic Information</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="UserEmail" class="form-label field-label">Identity User (Email)</label>
+                            <input id="UserEmail"
+                                   name="userEmail"
+                                   type="email"
+                                   class="form-control"
+                                   value="@ViewData["SelectedUserEmail"]"
+                                   list="identity-users"
+                                   placeholder="Enter staff email" />
+                            <datalist id="identity-users">
+                                @if (ViewData["UserEmails"] is IEnumerable<string> emails)
+                                {
+                                    foreach (var email in emails)
                                     {
-                                        foreach (var email in emails)
-                                        {
-                                            <option value="@email"></option>
-                                        }
+                                        <option value="@email"></option>
                                     }
-                                </datalist>
-                                <span asp-validation-for="UserId" class="text-danger small d-block mt-1"></span>
-                            </div>
-
-                            <div class="asset-panel p-3 mb-4">
-                                <div class="field-label mb-2">Assigned Asset</div>
-                                <div id="assigned-asset-text" class="fw-semibold">@ViewData["AssignedAssetText"]</div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label asp-for="EmployeeNumber" class="form-label field-label"></label>
-                                <input asp-for="EmployeeNumber" class="form-control" />
-                                <span asp-validation-for="EmployeeNumber" class="text-danger small d-block mt-1"></span>
-                            </div>
-
-                            <div class="mb-4">
-                                <label asp-for="PhoneNumber" class="form-label field-label"></label>
-                                <input asp-for="PhoneNumber" class="form-control" />
-                                <span asp-validation-for="PhoneNumber" class="text-danger small d-block mt-1"></span>
-                            </div>
+                                }
+                            </datalist>
+                            <span asp-validation-for="UserId" class="text-danger small d-block mt-1"></span>
                         </div>
 
-                        <div class="col-12 col-lg-6 ps-lg-4">
-                            <div class="mb-4">
-                                <label asp-for="FullName" class="form-label field-label"></label>
-                                <input asp-for="FullName" class="form-control" />
-                                <span asp-validation-for="FullName" class="text-danger small d-block mt-1"></span>
-                            </div>
+                        <div class="col-12 col-md-6">
+                            <label asp-for="FullName" class="form-label field-label"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small d-block mt-1"></span>
+                        </div>
 
-                            <div class="mb-4">
-                                <label asp-for="Department" class="form-label field-label"></label>
-                                <input asp-for="Department" class="form-control" />
-                                <span asp-validation-for="Department" class="text-danger small d-block mt-1"></span>
-                            </div>
+                        <div class="col-12 col-md-6">
+                            <label asp-for="EmployeeNumber" class="form-label field-label"></label>
+                            <input asp-for="EmployeeNumber" class="form-control" />
+                            <span asp-validation-for="EmployeeNumber" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label field-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small d-block mt-1"></span>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-2">
+                    <div class="section-title">Work Information</div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Department" class="form-label field-label"></label>
+                            <input asp-for="Department" class="form-control" />
+                            <span asp-validation-for="Department" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Designation" class="form-label field-label">Designation</label>
+                            <input asp-for="Designation" class="form-control" />
+                            <span asp-validation-for="Designation" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Location" class="form-label field-label">Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="Enter work location" />
+                            <span asp-validation-for="Location" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label field-label">Assigned Asset</label>
+                            <input id="assigned-asset-text"
+                                   type="text"
+                                   class="form-control readonly-field"
+                                   value="@ViewData["AssignedAssetText"]"
+                                   readonly />
+                            <small class="text-muted d-block mt-1">Assigned later from the Assignments module.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
                         <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2">Cancel</a>
                         <button type="submit" class="btn btn-primary btn-pill px-4 py-2">Create</button>
                     </div>
@@ -139,21 +164,21 @@
             async function refreshAssignedAsset() {
                 const email = emailInput.value.trim();
                 if (!email) {
-                    assetText.textContent = "None";
+                    assetText.value = "None";
                     return;
                 }
 
                 try {
                     const response = await fetch(`/Staff/LookupAssignedAsset?email=${encodeURIComponent(email)}`);
                     if (!response.ok) {
-                        assetText.textContent = "None";
+                        assetText.value = "None";
                         return;
                     }
 
                     const data = await response.json();
-                    assetText.textContent = data.assignedAsset || "None";
+                    assetText.value = data.assignedAsset || "None";
                 } catch {
-                    assetText.textContent = "None";
+                    assetText.value = "None";
                 }
             }
 

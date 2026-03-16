@@ -1,0 +1,179 @@
+@model AssetTracker.Models.Vendors.ViewModels.PurchaseRequestIndexVm
+
+@{
+    ViewData["Title"] = "Purchase Requests";
+
+    static string StatusBadge(AssetTracker.Models.Vendors.PurchaseRequestStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Draft => "text-bg-secondary",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Submitted => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.PendingApproval => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Approved => "text-bg-success",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Rejected => "text-bg-danger",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.ConvertedToPO => "text-bg-primary",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Cancelled => "text-bg-dark",
+        AssetTracker.Models.Vendors.PurchaseRequestStatus.Closed => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+
+    static string PriorityBadge(AssetTracker.Models.Vendors.PurchaseRequestPriority priority) => priority switch
+    {
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Urgent => "text-bg-danger",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.High => "text-bg-warning",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Normal => "text-bg-info",
+        AssetTracker.Models.Vendors.PurchaseRequestPriority.Low => "text-bg-secondary",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Purchase Requests</h1>
+        <p class="text-muted mb-0">Track internal procurement requests before purchase orders are created.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">New Purchase Request</a>
+</div>
+
+@if (TempData["PrSuccess"] is string successMessage)
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+@if (TempData["PrError"] is string errorMessage)
+{
+    <div class="alert alert-warning">@errorMessage</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total PRs</div>
+                <div class="h3 mb-0">@Model.TotalRequests</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Pending Approval</div>
+                <div class="h3 mb-0">@Model.PendingApproval</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Approved PRs</div>
+                <div class="h3 mb-0">@Model.Approved</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Converted to PO</div>
+                <div class="h3 mb-0">@Model.ConvertedToPo</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body border-bottom">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-12 col-lg-5">
+                <input type="search" name="q" value="@Model.Query" class="form-control" placeholder="Search PR number, requester, department..." />
+            </div>
+            <div class="col-12 col-lg-4">
+                <select asp-for="StatusFilter" name="status" class="form-select" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.PurchaseRequestStatus>()">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>PR Number</th>
+                    <th>Request Date</th>
+                    <th>Requested By</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Needed By</th>
+                    <th>Estimated Total</th>
+                    <th>Linked PO</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">No purchase requests found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.Items)
+                    {
+                        var hasLinkedPo = item.LinkedPurchaseOrderId.HasValue;
+                        var canEdit = item.CanEdit;
+                        var canSubmit = !hasLinkedPo && item.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.Draft;
+                        var canCreatePo = User.IsInRole("Admin")
+                            && !hasLinkedPo
+                            && item.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.Approved;
+                        var isLocked = hasLinkedPo || item.Status == AssetTracker.Models.Vendors.PurchaseRequestStatus.ConvertedToPO;
+
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="fw-semibold text-decoration-none">@item.PrNumber</a>
+                            </td>
+                            <td>@item.RequestDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.RequestedBy</td>
+                            <td>@item.Department</td>
+                            <td><span class="badge @PriorityBadge(item.Priority)">@item.Priority</span></td>
+                            <td><span class="badge @StatusBadge(item.Status)">@item.Status</span></td>
+                            <td>@(item.NeededByDate.HasValue ? item.NeededByDate.Value.ToString("dd MMM yyyy") : "-")</td>
+                            <td>KES @item.EstimatedTotal.ToString("N2")</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.LinkedPoNumber) ? "-" : item.LinkedPoNumber)</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-dark">View</a>
+                                    @if (canEdit)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                                    }
+                                    @if (canSubmit)
+                                    {
+                                        <form asp-action="Submit" asp-route-id="@item.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-secondary">Submit</button>
+                                        </form>
+                                    }
+                                    @if (canCreatePo)
+                                    {
+                                        <form asp-action="CreatePo" asp-route-id="@item.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success">Create PO</button>
+                                        </form>
+                                    }
+                                    @if (isLocked)
+                                    {
+                                        <span class="btn btn-outline-secondary disabled">Locked</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

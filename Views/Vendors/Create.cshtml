@@ -1,0 +1,98 @@
+@model AssetTracker.Models.Vendors.ViewModels.CreateVendorVm
+
+@{
+    ViewData["Title"] = "Create Vendor";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-0">Create Vendor</h1>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-controller="Vendors" asp-action="Create">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CompanyName" class="form-label">Company Name</label>
+                            <input asp-for="CompanyName" class="form-control" />
+                            <span asp-validation-for="CompanyName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Category" class="form-label">Category</label>
+                            <select asp-for="Category" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.VendorCategory>()" class="form-select"></select>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Website" class="form-label">Website</label>
+                            <input asp-for="Website" class="form-control" />
+                            <span asp-validation-for="Website" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Phone" class="form-label">Phone</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="PhysicalAddress" class="form-label">Physical Address</label>
+                            <input asp-for="PhysicalAddress" class="form-control" />
+                            <span asp-validation-for="PhysicalAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="AccountManagerName" class="form-label">Account Manager</label>
+                            <input asp-for="AccountManagerName" class="form-control" />
+                            <span asp-validation-for="AccountManagerName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AccountManagerEmail" class="form-label">Account Manager Email</label>
+                            <input asp-for="AccountManagerEmail" class="form-control" />
+                            <span asp-validation-for="AccountManagerEmail" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AccountManagerPhone" class="form-label">Account Manager Phone</label>
+                            <input asp-for="AccountManagerPhone" class="form-control" />
+                            <span asp-validation-for="AccountManagerPhone" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.VendorStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsPreferredVendor" class="form-check-input" />
+                                <label asp-for="IsPreferredVendor" class="form-check-label">Preferred Vendor</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Create Vendor</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

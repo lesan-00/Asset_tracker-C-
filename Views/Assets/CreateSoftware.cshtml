@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Create Software Asset";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Create Software Asset</h1>
+        <p class="text-muted mb-0">Select the software subtype to open its dedicated form.</p>
+    </div>
+    <a asp-action="Index" asp-route-group="software" class="btn btn-outline-secondary">Back to Software Assets</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-md-6">
+        <a asp-action="CreateLicensedApplication" class="card border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body">
+                <h2 class="h5 mb-2 text-body">Licensed Applications</h2>
+                <p class="text-muted mb-0">Create records for commercial applications with license and renewal details.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6">
+        <a asp-action="CreateOperatingSystem" class="card border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body">
+                <h2 class="h5 mb-2 text-body">Operating Systems</h2>
+                <p class="text-muted mb-0">Track OS edition, build, support end date, and patch status.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6">
+        <a asp-action="CreateSubscription" class="card border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body">
+                <h2 class="h5 mb-2 text-body">Subscriptions</h2>
+                <p class="text-muted mb-0">Capture billing cycle, start and expiry dates, and auto-renew settings.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6">
+        <a asp-action="CreateOpenSource" class="card border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body">
+                <h2 class="h5 mb-2 text-body">Open Source</h2>
+                <p class="text-muted mb-0">Manage deployment environment, security status, and maintainer metadata.</p>
+            </div>
+        </a>
+    </div>
+</div>

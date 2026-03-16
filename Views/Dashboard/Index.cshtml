@@ -16,59 +16,57 @@
 
 <div class="dashboard-page">
     <section class="dashboard-hero">
-        <div>
-            <h2 class="dashboard-title">Asset Operations Overview</h2>
-            <p class="dashboard-subtitle mb-0">Track core inventory health and allocation at a glance.</p>
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <h2 class="dashboard-title">Asset Operations Overview</h2>
+        <p class="dashboard-subtitle mb-0">Track core inventory health and allocation at a glance.</p>
+        <div class="dashboard-actions">
             <a asp-controller="Assets" asp-action="Create" class="btn btn-primary">Add Asset</a>
             <a asp-controller="Assignments" asp-action="Create" class="btn btn-outline-primary">Assign</a>
         </div>
     </section>
 
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card kpi-card h-100">
-                <div class="card-body">
+    <section class="dashboard-section">
+        <div class="dashboard-kpi-grid">
+            <a asp-controller="Assets" asp-action="Index" class="dashboard-kpi-link text-decoration-none text-reset" aria-label="Open all assets">
+                <div class="dashboard-kpi-card">
                     <div class="kpi-label">Total Assets</div>
                     <div class="kpi-value">@Model.TotalAssets</div>
                 </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card kpi-card h-100">
-                <div class="card-body">
+            </a>
+            <a asp-controller="Assets" asp-action="Index" asp-route-status="InStock" class="dashboard-kpi-link text-decoration-none text-reset" aria-label="Open in-stock assets">
+                <div class="dashboard-kpi-card">
                     <div class="kpi-label">In Stock</div>
                     <div class="kpi-value">@Model.InStock</div>
                 </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card kpi-card h-100">
-                <div class="card-body">
+            </a>
+            <a asp-controller="Assignments" asp-action="Index" asp-route-status="Active" class="dashboard-kpi-link text-decoration-none text-reset" aria-label="Open active assignments">
+                <div class="dashboard-kpi-card">
                     <div class="kpi-label">Assigned</div>
                     <div class="kpi-value">@Model.Assigned</div>
                 </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card kpi-card h-100">
-                <div class="card-body">
+            </a>
+            <a asp-controller="Assets" asp-action="Index" asp-route-status="InRepair" class="dashboard-kpi-link text-decoration-none text-reset" aria-label="Open in-repair assets">
+                <div class="dashboard-kpi-card">
                     <div class="kpi-label">In Repair</div>
                     <div class="kpi-value">@Model.InRepair</div>
                 </div>
-            </div>
+            </a>
+            <a asp-controller="Assets" asp-action="Index" asp-route-status="Retired" class="dashboard-kpi-link text-decoration-none text-reset" aria-label="Open retired assets">
+                <div class="dashboard-kpi-card">
+                    <div class="kpi-label">Retired</div>
+                    <div class="kpi-value">@Model.Retired</div>
+                </div>
+            </a>
         </div>
-    </div>
+    </section>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card panel-card h-100">
-                <div class="card-header panel-header d-flex justify-content-between align-items-center">
-                    <h3 class="panel-title mb-0">Allocation by Department</h3>
+    <section class="dashboard-section">
+        <div class="dashboard-content-grid">
+            <div class="dashboard-section-card h-100">
+                <div class="dashboard-section-header d-flex justify-content-between align-items-center">
+                    <h3 class="section-title mb-0">Allocation by Department</h3>
                     <span class="badge text-bg-light">Assigned: @Model.Assigned</span>
                 </div>
-                <div class="card-body panel-body">
+                <div class="dashboard-section-body">
                     @if (Model.AllocationByDepartment.Count == 0)
                     {
                         <p class="text-secondary mb-0">No department allocation data.</p>
@@ -90,24 +88,22 @@
                     }
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6">
-            <div class="card panel-card h-100">
-                <div class="card-header panel-header d-flex justify-content-between align-items-center">
-                    <h3 class="panel-title mb-0">Open Issues</h3>
+            <div class="dashboard-section-card h-100">
+                <div class="dashboard-section-header d-flex justify-content-between align-items-center">
+                    <h3 class="section-title mb-0">Open Issues</h3>
                     <a asp-controller="Issues" asp-action="Index" class="small fw-semibold text-decoration-none">View all</a>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="dashboard-section-body issue-list">
                     @if (Model.LatestOpenIssues.Count == 0)
                     {
-                        <div class="list-group-item text-secondary">No open issues.</div>
+                        <div class="text-secondary">No open issues.</div>
                     }
                     else
                     {
                         @foreach (var issue in Model.LatestOpenIssues)
                         {
-                            <a asp-controller="Issues" asp-action="Details" asp-route-id="@issue.Id" class="list-group-item list-group-item-action issue-row">
+                            <a asp-controller="Issues" asp-action="Details" asp-route-id="@issue.Id" class="issue-row">
                                 <div class="d-flex justify-content-between align-items-start gap-2">
                                     <div>
                                         <div class="fw-semibold">@issue.Title</div>
@@ -121,31 +117,33 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card panel-card">
-        <div class="card-header panel-header">
-            <h3 class="panel-title mb-0">Recent Activity</h3>
-        </div>
-        <div class="list-group list-group-flush panel-list-scroll">
-            @if (Model.RecentActivity.Count == 0)
-            {
-                <div class="list-group-item text-secondary">No recent activity.</div>
-            }
-            else
-            {
-                @foreach (var activity in Model.RecentActivity)
+    <section class="dashboard-section">
+        <div class="dashboard-section-card">
+            <div class="dashboard-section-header">
+                <h3 class="section-title mb-0">Recent Activity</h3>
+            </div>
+            <div class="dashboard-section-body panel-list-scroll">
+                @if (Model.RecentActivity.Count == 0)
                 {
-                    <div class="list-group-item d-flex justify-content-between align-items-start gap-3">
-                        <div>
-                            <div class="fw-semibold">@activity.Message</div>
-                            <div class="text-secondary small text-uppercase">@activity.Type</div>
-                        </div>
-                        <div class="text-secondary small">@activity.OccurredAt.ToLocalTime().ToString("g")</div>
-                    </div>
+                    <div class="text-secondary">No recent activity.</div>
                 }
-            }
+                else
+                {
+                    @foreach (var activity in Model.RecentActivity)
+                    {
+                        <div class="activity-item d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="fw-semibold">@activity.Message</div>
+                                <div class="text-secondary small text-uppercase">@activity.Type</div>
+                            </div>
+                            <div class="text-secondary small">@activity.OccurredAt.ToLocalTime().ToString("g")</div>
+                        </div>
+                    }
+                }
+            </div>
         </div>
-    </div>
+    </section>
 </div>
 

@@ -63,7 +63,7 @@ public class StaffController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create(string userEmail, [Bind("Id,FullName,EmployeeNumber,Department,PhoneNumber")] StaffProfile profile)
+    public async Task<IActionResult> Create(string userEmail, [Bind("Id,FullName,EmployeeNumber,Department,Designation,Location,PhoneNumber")] StaffProfile profile)
     {
         IdentityUser? user = null;
         if (string.IsNullOrWhiteSpace(userEmail))
@@ -98,7 +98,7 @@ public class StaffController : Controller
             await PopulateUserEmailSuggestionsAsync(userEmail);
             ViewData["SelectedUserEmail"] = userEmail ?? string.Empty;
             ViewData["AssignedAssetText"] = await GetAssignedAssetTextByEmailAsync(userEmail);
-            return View(profile);
+            return RedirectToAction(nameof(Create));
         }
 
         profile.CreatedAt = DateTime.UtcNow;
@@ -128,7 +128,7 @@ public class StaffController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,FullName,EmployeeNumber,Department,PhoneNumber,CreatedAt")] StaffProfile profile)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,FullName,EmployeeNumber,Department,Designation,Location,PhoneNumber,CreatedAt")] StaffProfile profile)
     {
         if (id != profile.Id)
         {
@@ -138,7 +138,7 @@ public class StaffController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateUsersDropDownAsync(profile.UserId);
-            return View(profile);
+            return RedirectToAction(nameof(Edit), new { id = profile.Id });
         }
 
         var userExists = await _userManager.FindByIdAsync(profile.UserId) is not null;
@@ -146,7 +146,7 @@ public class StaffController : Controller
         {
             ModelState.AddModelError(nameof(StaffProfile.UserId), "Selected user does not exist.");
             await PopulateUsersDropDownAsync(profile.UserId);
-            return View(profile);
+            return RedirectToAction(nameof(Edit), new { id = profile.Id });
         }
 
         var duplicate = await _context.StaffProfiles.AnyAsync(s => s.UserId == profile.UserId && s.Id != profile.Id);
@@ -154,7 +154,7 @@ public class StaffController : Controller
         {
             ModelState.AddModelError(nameof(StaffProfile.UserId), "This user already has a staff profile.");
             await PopulateUsersDropDownAsync(profile.UserId);
-            return View(profile);
+            return RedirectToAction(nameof(Edit), new { id = profile.Id });
         }
 
         try

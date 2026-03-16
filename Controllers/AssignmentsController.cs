@@ -22,7 +22,7 @@ public class AssignmentsController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index(string? q)
+    public async Task<IActionResult> Index(string? q, string? status = null)
     {
         var normalizedQuery = q?.Trim();
         var query = _context.Assignments
@@ -30,6 +30,22 @@ public class AssignmentsController : Controller
             .Include(a => a.Asset)
             .Include(a => a.StaffProfile)
             .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (string.Equals(status, "active", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(a =>
+                    a.Status == AssignmentStatus.Active ||
+                    a.Status == AssignmentStatus.PendingAcceptance ||
+                    a.Status == AssignmentStatus.Accepted ||
+                    a.Status == AssignmentStatus.ReturnRequested);
+            }
+            else if (Enum.TryParse<AssignmentStatus>(status, true, out var parsedStatus))
+            {
+                query = query.Where(a => a.Status == parsedStatus);
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
@@ -43,9 +59,11 @@ public class AssignmentsController : Controller
                 (a.Notes != null && a.Notes.ToLower().Contains(lowered)));
         }
 
-        var cards = await query
+        query = query
             .OrderByDescending(a => a.AssignedAt)
-            .ThenByDescending(a => a.Id)
+            .ThenByDescending(a => a.Id);
+
+        var cards = await query
             .Take(200)
             .Select(a => new AssignmentCardVm
             {
@@ -137,7 +155,11 @@ public class AssignmentsController : Controller
         var hasActiveAssignment = vm.AssetId.HasValue &&
                                   await _context.Assignments
                                       .AsNoTracking()
-                                      .AnyAsync(a => a.AssetId == vm.AssetId.Value && IsActiveStatus(a.Status));
+                                      .AnyAsync(a => a.AssetId == vm.AssetId.Value &&
+                                                     (a.Status == AssignmentStatus.Active
+                                                      || a.Status == AssignmentStatus.PendingAcceptance
+                                                      || a.Status == AssignmentStatus.Accepted
+                                                      || a.Status == AssignmentStatus.ReturnRequested));
         if (hasActiveAssignment)
         {
             ModelState.AddModelError(nameof(NewAssignmentVm.AssetId), "This asset already has an active assignment.");
@@ -167,7 +189,7 @@ public class AssignmentsController : Controller
         if (!ModelState.IsValid)
         {
             vm = await BuildCreateVmAsync(vm);
-            return View(vm);
+            return RedirectToAction(nameof(Create));
         }
 
         var notesParts = new List<string>();
@@ -228,7 +250,7 @@ public class AssignmentsController : Controller
             _logger.LogError(ex, "Assignment create failed for asset {AssetId}.", vm.AssetId);
             ModelState.AddModelError(string.Empty, "Unable to save assignment right now. Please try again.");
             vm = await BuildCreateVmAsync(vm);
-            return View(vm);
+            return RedirectToAction(nameof(Create));
         }
 
         return RedirectToAction(nameof(Index));

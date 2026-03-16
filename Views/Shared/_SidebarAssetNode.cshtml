@@ -1,0 +1,73 @@
+@model AssetTracker.Models.Assets.AssetNavNodeVm
+
+@{
+    var hasChildren = Model.Children.Count > 0;
+    var hasUrl = !string.IsNullOrWhiteSpace(Model.NavigationUrl);
+    var collapseTarget = $"#{Model.NodeId}";
+
+    var markerClass = Model.Key switch
+    {
+        "hardware" => "marker-hardware",
+        "software" => "marker-software",
+        "physical" => "marker-physical",
+        _ => "marker-neutral"
+    };
+}
+
+<li class="sidebar-asset-node depth-@Model.Depth">
+    <div class="d-flex align-items-center gap-1 @(Model.IsSelected ? "selected" : string.Empty)">
+        @if (hasChildren)
+        {
+            <button type="button"
+                    class="btn btn-link p-0 sidebar-asset-toggle @(Model.IsExpanded ? string.Empty : "collapsed")"
+                    data-bs-toggle="collapse"
+                    data-bs-target="@collapseTarget"
+                    aria-expanded="@(Model.IsExpanded ? "true" : "false")"
+                    aria-controls="@Model.NodeId"
+                    aria-label="Toggle @Model.Name">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        }
+        else
+        {
+            <span class="sidebar-asset-toggle-spacer"></span>
+        }
+
+        @if (hasUrl)
+        {
+            <a href="@Model.NavigationUrl" class="sidebar-asset-link @(Model.IsSelected ? "active" : string.Empty)">
+                @if (!string.IsNullOrWhiteSpace(Model.Icon))
+                {
+                    <i class="@Model.Icon"></i>
+                }
+                <span class="sidebar-asset-marker @markerClass"></span>
+                <span class="sidebar-asset-label">@Model.Name</span>
+                <span class="badge sidebar-assets-badge ms-auto">@Model.Count</span>
+            </a>
+        }
+        else
+        {
+            <span class="sidebar-asset-link @(Model.IsSelected ? "active" : string.Empty)">
+                @if (!string.IsNullOrWhiteSpace(Model.Icon))
+                {
+                    <i class="@Model.Icon"></i>
+                }
+                <span class="sidebar-asset-marker @markerClass"></span>
+                <span class="sidebar-asset-label">@Model.Name</span>
+                <span class="badge sidebar-assets-badge ms-auto">@Model.Count</span>
+            </span>
+        }
+    </div>
+
+    @if (hasChildren)
+    {
+        <div id="@Model.NodeId" class="collapse @(Model.IsExpanded ? "show" : string.Empty)">
+            <ul class="list-unstyled mb-0 ps-3">
+                @foreach (var child in Model.Children)
+                {
+                    <partial name="~/Views/Shared/_SidebarAssetNode.cshtml" model="child" />
+                }
+            </ul>
+        </div>
+    }
+</li>

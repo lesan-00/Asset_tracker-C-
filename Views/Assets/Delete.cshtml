@@ -2,16 +2,23 @@
 
 @{
     ViewData["Title"] = "Delete Asset";
+    var assignmentsCount = ViewData["AssignmentsCount"] is int a ? a : 0;
+    var issuesCount = ViewData["IssuesCount"] is int i ? i : 0;
+    var supportTicketsCount = ViewData["SupportTicketsCount"] is int s ? s : 0;
 }
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white">
-                <h1 class="h4 mb-0 text-danger">Delete Asset</h1>
+                <h1 class="h4 mb-0 text-danger">Delete Asset Permanently</h1>
             </div>
             <div class="card-body">
-                <p class="mb-4">Are you sure you want to delete this asset?</p>
+                <div class="alert alert-danger" role="alert">
+                    This will permanently delete the asset and its related history. This action cannot be undone.
+                </div>
+
+                <p class="mb-3">Confirm permanent deletion for this retired asset:</p>
 
                 <dl class="row">
                     <dt class="col-sm-4">Asset Tag</dt>
@@ -27,9 +34,18 @@
                     <dd class="col-sm-8">@Model.Location</dd>
                 </dl>
 
+                <div class="border rounded p-3 mb-4 bg-light-subtle">
+                    <div class="fw-semibold mb-2">Related records that will be removed or detached</div>
+                    <ul class="mb-0">
+                        <li>Assignment history to delete: <strong>@assignmentsCount</strong></li>
+                        <li>Issue links to detach: <strong>@issuesCount</strong></li>
+                        <li>Vendor support ticket links to detach: <strong>@supportTicketsCount</strong></li>
+                    </ul>
+                </div>
+
                 <form asp-action="Delete" class="d-flex gap-2">
                     <input type="hidden" asp-for="Id" />
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
                     <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
                 </form>
             </div>

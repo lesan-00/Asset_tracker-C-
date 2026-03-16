@@ -1,0 +1,130 @@
+@model AssetTracker.Models.Assets.EditLicensedApplicationVm
+
+@{
+    ViewData["Title"] = "Edit Licensed Application";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Edit Licensed Application</h1>
+                <p class="text-muted mb-0">Update licensing, assignment, lifecycle, and financial information.</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditLicensedApplication" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input asp-for="Id" type="hidden" />
+
+                    <h2 class="h6 text-muted mb-3">Software Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="AssetTag" class="form-label"></label>
+                            <input asp-for="AssetTag" class="form-control" />
+                            <span asp-validation-for="AssetTag" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Version" class="form-label"></label>
+                            <input asp-for="Version" class="form-control" />
+                            <span asp-validation-for="Version" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VendorId" class="form-label">Vendor</label>
+                            <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                <option value="">No vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Licensing Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="LicenseType" class="form-label"></label>
+                            <input asp-for="LicenseType" class="form-control" />
+                            <span asp-validation-for="LicenseType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="LicenseKey" class="form-label"></label>
+                            <input asp-for="LicenseKey" class="form-control" />
+                            <span asp-validation-for="LicenseKey" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Assignment and Lifecycle</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="InstalledDate" class="form-label">Installed Date</label>
+                            <input asp-for="InstalledDate" type="date" class="form-control" />
+                            <span asp-validation-for="InstalledDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PurchaseDate" class="form-label"></label>
+                            <input asp-for="PurchaseDate" type="date" class="form-control" />
+                            <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ExpiryDate" class="form-label"></label>
+                            <input asp-for="ExpiryDate" type="date" class="form-control" />
+                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="RenewalReminderDate" class="form-label"></label>
+                            <input asp-for="RenewalReminderDate" type="date" class="form-control" />
+                            <span asp-validation-for="RenewalReminderDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Financial Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="Cost" class="form-label"></label>
+                            <input asp-for="Cost" class="form-control" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Currency" class="form-label"></label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InvoiceReference" class="form-label"></label>
+                            <input asp-for="InvoiceReference" class="form-control" />
+                            <span asp-validation-for="InvoiceReference" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PurchaseOrderReference" class="form-label"></label>
+                            <input asp-for="PurchaseOrderReference" class="form-control" />
+                            <span asp-validation-for="PurchaseOrderReference" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

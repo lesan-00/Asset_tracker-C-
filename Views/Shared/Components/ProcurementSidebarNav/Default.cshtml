@@ -1,0 +1,52 @@
+@model AssetTracker.Models.Procurement.ProcurementSidebarNavVm
+
+<li class="nav-item sidebar-procurement">
+    <div class="sidebar-procurement-parent @(Model.IsAnyActive ? "active" : string.Empty)">
+        <a class="nav-link flex-grow-1" asp-controller="Procurement" asp-action="Requests">
+            <i class="bi bi-diagram-3 me-2"></i>
+            <span class="sidebar-link-label">Procurement</span>
+            <span class="badge sidebar-assets-badge ms-auto">@Model.TotalCount</span>
+        </a>
+        <button type="button"
+                class="btn btn-link p-0 sidebar-procurement-toggle @(Model.IsExpanded ? string.Empty : "collapsed")"
+                data-bs-toggle="collapse"
+                data-bs-target="#sidebarProcurementTree"
+                aria-expanded="@(Model.IsExpanded ? "true" : "false")"
+                aria-controls="sidebarProcurementTree"
+                aria-label="Toggle Procurement navigation">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="collapse sidebar-procurement-tree @(Model.IsExpanded ? "show" : string.Empty)" id="sidebarProcurementTree">
+        <ul class="list-unstyled mb-0 ps-2">
+            <li class="sidebar-procurement-node">
+                <a asp-controller="Procurement" asp-action="Requests" class="sidebar-procurement-link @(Model.IsPurchaseRequestsActive ? "active" : string.Empty)">
+                    <span class="sidebar-procurement-marker marker-pipeline"></span>
+                    <span class="sidebar-procurement-label">Purchase Requests</span>
+                    <span class="badge sidebar-assets-badge ms-auto">@Model.PurchaseRequestCount</span>
+                </a>
+            </li>
+            <li class="sidebar-procurement-node">
+                <a asp-controller="PurchaseOrders" asp-action="Index" class="sidebar-procurement-link @(Model.IsPurchaseOrdersActive ? "active" : string.Empty)">
+                    <span class="sidebar-procurement-marker marker-po"></span>
+                    <span class="sidebar-procurement-label">Purchase Orders</span>
+                    <span class="badge sidebar-assets-badge ms-auto">@Model.PurchaseOrderCount</span>
+                </a>
+            </li>
+            <li class="sidebar-procurement-node">
+                <a asp-controller="VendorInvoices" asp-action="Index" class="sidebar-procurement-link @(Model.IsInvoicesActive ? "active" : string.Empty)">
+                    <span class="sidebar-procurement-marker marker-invoice"></span>
+                    <span class="sidebar-procurement-label">Invoices</span>
+                    <span class="badge sidebar-assets-badge ms-auto">@Model.InvoiceCount</span>
+                </a>
+            </li>
+            <li class="sidebar-procurement-node">
+                <a asp-controller="PurchaseRequests" asp-action="Create" class="sidebar-procurement-link @(Model.IsNewRequestActive ? "active" : string.Empty)">
+                    <span class="sidebar-procurement-marker marker-new"></span>
+                    <span class="sidebar-procurement-label">+ New Request</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>

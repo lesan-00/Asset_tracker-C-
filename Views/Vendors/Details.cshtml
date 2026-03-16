@@ -1,0 +1,567 @@
+@model AssetTracker.Models.Vendors.ViewModels.VendorDetailsVm
+
+@{
+    ViewData["Title"] = "Vendor Details";
+
+    var today = DateTime.UtcNow.Date;
+    var isArchived = Model.Vendor.IsArchived;
+    var latestContract = Model.Contracts.OrderByDescending(c => c.EndDate).FirstOrDefault();
+
+    static string VendorStatusBadge(AssetTracker.Models.Vendors.VendorStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.VendorStatus.Active => "text-bg-success",
+        AssetTracker.Models.Vendors.VendorStatus.Inactive => "text-bg-secondary",
+        AssetTracker.Models.Vendors.VendorStatus.Blacklisted => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    static string ContractStatusBadge(AssetTracker.Models.Vendors.ContractStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.ContractStatus.Active => "text-bg-success",
+        AssetTracker.Models.Vendors.ContractStatus.PendingRenewal => "text-bg-warning",
+        AssetTracker.Models.Vendors.ContractStatus.Expired => "text-bg-danger",
+        AssetTracker.Models.Vendors.ContractStatus.Terminated => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@Model.Vendor.CompanyName</h1>
+        <p class="text-muted mb-1">Vendor ID: @Model.Vendor.VendorCode</p>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge text-bg-light border">@Model.Vendor.Category</span>
+            <span class="badge @VendorStatusBadge(Model.Vendor.Status)">@Model.Vendor.Status</span>
+            @if (isArchived)
+            {
+                <span class="badge text-bg-dark">Archived</span>
+            }
+            @if (Model.Vendor.IsPreferredVendor)
+            {
+                <span class="badge text-bg-info">Preferred Vendor</span>
+            }
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        @if (!isArchived)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Vendor.Id" class="btn btn-outline-primary">Edit</a>
+            <a asp-controller="PurchaseRequests" asp-action="Create" asp-route-suggestedVendorId="@Model.Vendor.Id" class="btn btn-primary">New PR</a>
+            <a asp-controller="VendorInvoices" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-outline-secondary">Log Invoice</a>
+            @if (latestContract is not null)
+            {
+                <form asp-controller="VendorContracts" asp-action="Renew" asp-route-id="@latestContract.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-dark">Renew Contract</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="VendorContracts" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-outline-dark">Renew Contract</a>
+            }
+        }
+        else
+        {
+            <form asp-action="Restore" asp-route-id="@Model.Vendor.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success">Restore Vendor</button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (TempData["VendorSuccess"] is string successMessage)
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+@if (TempData["VendorWarning"] is string warningMessage)
+{
+    <div class="alert alert-warning">@warningMessage</div>
+}
+@if (isArchived)
+{
+    <div class="alert alert-secondary">
+        <div><strong>Archived vendor:</strong> this vendor is excluded from default procurement and asset vendor dropdowns.</div>
+        <div>Archived At: @(Model.Vendor.ArchivedAt.HasValue ? Model.Vendor.ArchivedAt.Value.ToString("dd MMM yyyy, HH:mm") : "Not recorded")</div>
+        @if (!string.IsNullOrWhiteSpace(Model.Vendor.ArchiveReason))
+        {
+            <div>Reason: @Model.Vendor.ArchiveReason</div>
+        }
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Spend (KES)</div>
+                <div class="h4 mb-0">@Model.TotalSpend.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Pending / Overdue Invoices</div>
+                <div class="h4 mb-0">@Model.PendingInvoices / @Model.OverdueInvoices</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Active Contracts</div>
+                <div class="h4 mb-0">@Model.ActiveContracts</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Identity Information</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Vendor ID</dt>
+                    <dd class="col-sm-7">@Model.Vendor.VendorCode</dd>
+                    <dt class="col-sm-5">Company Name</dt>
+                    <dd class="col-sm-7">@Model.Vendor.CompanyName</dd>
+                    <dt class="col-sm-5">Category</dt>
+                    <dd class="col-sm-7">@Model.Vendor.Category</dd>
+                    <dt class="col-sm-5">Preferred Vendor</dt>
+                    <dd class="col-sm-7">@(Model.Vendor.IsPreferredVendor ? "Yes" : "No")</dd>
+                    <dt class="col-sm-5">Archived At</dt>
+                    <dd class="col-sm-7">@(Model.Vendor.ArchivedAt.HasValue ? Model.Vendor.ArchivedAt.Value.ToString("dd MMM yyyy, HH:mm") : "Not archived")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white"><h2 class="h6 mb-0">Status & Contacts</h2></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Status</dt>
+                    <dd class="col-sm-7"><span class="badge @VendorStatusBadge(Model.Vendor.Status)">@Model.Vendor.Status</span></dd>
+                    <dt class="col-sm-5">Email</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Vendor.Email) ? "Not provided" : Model.Vendor.Email)</dd>
+                    <dt class="col-sm-5">Phone</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Vendor.Phone) ? "Not provided" : Model.Vendor.Phone)</dd>
+                    <dt class="col-sm-5">Website</dt>
+                    <dd class="col-sm-7">
+                        @if (string.IsNullOrWhiteSpace(Model.Vendor.Website))
+                        {
+                            <span>Not provided</span>
+                        }
+                        else
+                        {
+                            <a href="@Model.Vendor.Website" target="_blank" rel="noreferrer">@Model.Vendor.Website</a>
+                        }
+                    </dd>
+                    <dt class="col-sm-5">Address</dt>
+                    <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Vendor.PhysicalAddress) ? "Not provided" : Model.Vendor.PhysicalAddress)</dd>
+                    <dt class="col-sm-5">Account Manager</dt>
+                    <dd class="col-sm-7">
+                        @if (string.IsNullOrWhiteSpace(Model.Vendor.AccountManagerName))
+                        {
+                            <span>Not provided</span>
+                        }
+                        else
+                        {
+                            <span>@Model.Vendor.AccountManagerName</span>
+                            if (!string.IsNullOrWhiteSpace(Model.Vendor.AccountManagerEmail))
+                            {
+                                <span class="d-block text-muted small">@Model.Vendor.AccountManagerEmail</span>
+                            }
+                            if (!string.IsNullOrWhiteSpace(Model.Vendor.AccountManagerPhone))
+                            {
+                                <span class="d-block text-muted small">@Model.Vendor.AccountManagerPhone</span>
+                            }
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Assets Supplied</h2>
+                <span class="badge text-bg-light border">@Model.LinkedAssets.Count</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Asset Tag</th>
+                            <th>Type</th>
+                            <th>Brand/Model</th>
+                            <th>Status</th>
+                            <th class="text-end">View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.LinkedAssets.Count == 0)
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-3">No linked assets.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var asset in Model.LinkedAssets)
+                            {
+                                <tr>
+                                    <td>@asset.AssetTag</td>
+                                    <td>@asset.AssetType</td>
+                                    <td>@asset.Brand @asset.Model</td>
+                                    <td>@asset.Status</td>
+                                    <td class="text-end"><a asp-controller="Assets" asp-action="Details" asp-route-id="@asset.Id" class="btn btn-sm btn-outline-secondary">Asset</a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Purchase Orders</h2>
+                @if (!isArchived)
+                {
+                    <a asp-controller="PurchaseRequests" asp-action="Create" asp-route-suggestedVendorId="@Model.Vendor.Id" class="btn btn-sm btn-outline-primary">New PR</a>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">Archived Vendor</span>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>PO Number</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.PurchaseOrders.Count == 0)
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-3">No purchase orders logged.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var po in Model.PurchaseOrders)
+                            {
+                                <tr>
+                                    <td>@po.PoNumber</td>
+                                    <td>@po.OrderDate.ToString("dd MMM yyyy")</td>
+                                    <td>@po.Status</td>
+                                    <td>@po.TotalAmount.ToString("N2") @po.Currency</td>
+                                    <td>@(string.IsNullOrWhiteSpace(po.Notes) ? "-" : po.Notes)</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Invoices</h2>
+                @if (!isArchived)
+                {
+                    <a asp-controller="VendorInvoices" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-sm btn-outline-secondary">Log Invoice</a>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">Archived Vendor</span>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Invoice Date</th>
+                            <th>Due Date</th>
+                            <th>PO</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Invoices.Count == 0)
+                        {
+                            <tr><td colspan="7" class="text-center text-muted py-3">No invoices logged.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var invoice in Model.Invoices)
+                            {
+                                var effectiveStatus = invoice.PaymentStatus == AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending
+                                                      && invoice.DueDate.Date < today
+                                    ? AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue
+                                    : invoice.PaymentStatus;
+                                var isOverdue = effectiveStatus == AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue;
+
+                                var statusClass = effectiveStatus switch
+                                {
+                                    AssetTracker.Models.Vendors.InvoicePaymentStatus.Paid => "text-bg-success",
+                                    AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending => "text-bg-warning",
+                                    AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue => "text-bg-danger",
+                                    AssetTracker.Models.Vendors.InvoicePaymentStatus.Cancelled => "text-bg-secondary",
+                                    _ => "text-bg-secondary"
+                                };
+
+                                var isPayable = !isArchived && effectiveStatus is AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending or AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue;
+                                var canEditOrDelete = !isArchived;
+
+                                <tr class="@(isOverdue ? "table-danger" : string.Empty)">
+                                    <td>@invoice.InvoiceNumber</td>
+                                    <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                                    <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
+                                    <td>@(invoice.PurchaseOrder?.PoNumber ?? "-")</td>
+                                    <td>
+                                        <span class="badge @statusClass">@effectiveStatus</span>
+                                        @if (invoice.PaidDate.HasValue)
+                                        {
+                                            <span class="d-block text-muted small">Paid: @invoice.PaidDate.Value.ToString("dd MMM yyyy")</span>
+                                        }
+                                    </td>
+                                    <td>@invoice.Currency @invoice.Amount.ToString("N2")</td>
+                                    <td class="text-end">
+                                        @if (isPayable)
+                                        {
+                                            <form asp-controller="VendorInvoices" asp-action="MarkAsPaid" asp-route-id="@invoice.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-success">Mark as Paid</button>
+                                            </form>
+                                        }
+                                        @if (canEditOrDelete)
+                                        {
+                                            <a asp-controller="VendorInvoices" asp-action="Edit" asp-route-id="@invoice.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <a asp-controller="VendorInvoices" asp-action="Delete" asp-route-id="@invoice.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Read only</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Contracts</h2>
+                @if (!isArchived)
+                {
+                    <a asp-controller="VendorContracts" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-sm btn-outline-dark">Add Contract</a>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">Archived Vendor</span>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Alert</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Contracts.Count == 0)
+                        {
+                            <tr><td colspan="6" class="text-center text-muted py-3">No contracts available.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var contract in Model.Contracts)
+                            {
+                                var alertWindow = contract.AlertBeforeDays ?? 30;
+                                var isExpired = contract.EndDate.Date < today;
+                                var isNearExpiry = !isExpired && contract.EndDate.Date <= today.AddDays(alertWindow);
+                                <tr>
+                                    <td>@contract.ContractTitle</td>
+                                    <td>@contract.StartDate.ToString("dd MMM yyyy")</td>
+                                    <td>@contract.EndDate.ToString("dd MMM yyyy")</td>
+                                    <td><span class="badge @ContractStatusBadge(contract.Status)">@contract.Status</span></td>
+                                    <td>
+                                        @if (isExpired)
+                                        {
+                                            <span class="badge text-bg-danger">Expired</span>
+                                        }
+                                        else if (isNearExpiry)
+                                        {
+                                            <span class="badge text-bg-warning">Expiring soon</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-success">Active</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (!isArchived)
+                                        {
+                                            <a asp-controller="VendorContracts" asp-action="Edit" asp-route-id="@contract.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <form asp-controller="VendorContracts" asp-action="Renew" asp-route-id="@contract.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Renew</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Read only</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Support Tickets</h2>
+                @if (!isArchived)
+                {
+                    <a asp-controller="VendorSupportTickets" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-sm btn-outline-primary">New Ticket</a>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">Archived Vendor</span>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ticket #</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Opened</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SupportTickets.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-3">No support tickets.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var ticket in Model.SupportTickets)
+                            {
+                                <tr>
+                                    <td>@ticket.TicketNumber</td>
+                                    <td>@ticket.Type</td>
+                                    <td>@ticket.Status</td>
+                                    <td>@ticket.OpenedDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Documents</h2>
+                @if (!isArchived)
+                {
+                    <a asp-controller="VendorDocuments" asp-action="Create" asp-route-vendorId="@Model.Vendor.Id" class="btn btn-sm btn-outline-secondary">Add Document</a>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">Archived Vendor</span>
+                }
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Uploaded</th>
+                            <th>File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Documents.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-3">No documents uploaded.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <tr>
+                                    <td>@doc.DocumentName</td>
+                                    <td>@doc.DocumentType</td>
+                                    <td>@doc.UploadedAt.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(doc.FilePath))
+                                        {
+                                            <a href="@doc.FilePath" target="_blank" rel="noreferrer">Open</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No file</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a asp-action="Index" asp-route-archiveView="@(isArchived ? "archived" : "active")" class="btn btn-outline-secondary">Back to Vendors</a>
+    @if (!isArchived)
+    {
+        <a asp-action="Archive" asp-route-id="@Model.Vendor.Id" class="btn btn-outline-danger">Archive Vendor</a>
+    }
+    else
+    {
+        <form asp-action="Restore" asp-route-id="@Model.Vendor.Id" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-success">Restore Vendor</button>
+        </form>
+    }
+</div>

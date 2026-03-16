@@ -42,6 +42,10 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IAssetTaxonomyService, AssetTaxonomyService>();
+builder.Services.AddScoped<IVendorCodeGenerator, VendorCodeGenerator>();
+builder.Services.AddScoped<IVendorKpiService, VendorKpiService>();
+builder.Services.AddScoped<IPurchaseOrderStatusSyncService, PurchaseOrderStatusSyncService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

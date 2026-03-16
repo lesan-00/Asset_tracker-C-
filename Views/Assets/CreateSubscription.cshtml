@@ -1,0 +1,295 @@
+@model AssetTracker.Models.Assets.CreateSubscriptionVm
+
+@{
+    ViewData["Title"] = "Create Subscription";
+    var getPurchaseOrdersUrl = Url.Action("GetSubscriptionPurchaseOrders", "Assets") ?? string.Empty;
+    var getPurchaseOrderFinancialsUrl = Url.Action("GetSubscriptionPurchaseOrderFinancials", "Assets") ?? string.Empty;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Create Subscription</h1>
+                <p class="text-muted mb-0">Manage subscription plan, billing, renewal, and assignment metadata.</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateSubscription" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <h2 class="h6 text-muted mb-3">Subscription Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="AssetTag" class="form-label"></label>
+                            <input asp-for="AssetTag" class="form-control" />
+                            <span asp-validation-for="AssetTag" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="VendorId" class="form-label">Vendor</label>
+                            <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                <option value="">No vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BillingCycle" class="form-label"></label>
+                            <select asp-for="BillingCycle" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareBillingCycle>()" class="form-select"></select>
+                            <span asp-validation-for="BillingCycle" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Lifecycle and Assignment</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="StartDate" class="form-label"></label>
+                            <input asp-for="StartDate" type="date" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ExpiryDate" class="form-label"></label>
+                            <input asp-for="ExpiryDate" type="date" class="form-control" />
+                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="RenewalReminderDate" class="form-label"></label>
+                            <input asp-for="RenewalReminderDate" type="date" class="form-control" />
+                            <span asp-validation-for="RenewalReminderDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input asp-for="AutoRenew" class="form-check-input" />
+                                <label asp-for="AutoRenew" class="form-check-label"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AssignedToUserOrDepartment" class="form-label"></label>
+                            <input asp-for="AssignedToUserOrDepartment" class="form-control" />
+                            <span asp-validation-for="AssignedToUserOrDepartment" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InstalledOn" class="form-label"></label>
+                            <input asp-for="InstalledOn" class="form-control" />
+                            <span asp-validation-for="InstalledOn" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Location" class="form-label"></label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Financial Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="Cost" class="form-label"></label>
+                            <input asp-for="Cost" id="costInput" type="number" min="0" step="0.01" class="form-control" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Currency" class="form-label"></label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PurchaseOrderId" class="form-label">Purchase Order</label>
+                            <select asp-for="PurchaseOrderId"
+                                    class="form-select searchable-po"
+                                    id="purchaseOrderSelect"
+                                    data-placeholder="Select or search purchase order"
+                                    data-selected="@Model.PurchaseOrderId">
+                                <option value="">Select or search purchase order</option>
+                            </select>
+                            <span asp-validation-for="PurchaseOrderId" class="text-danger"></span>
+                            <input asp-for="PurchaseOrderReference" type="hidden" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InvoiceReference" class="form-label"></label>
+                            <input asp-for="InvoiceReference" id="invoiceReferenceInput" class="form-control" readonly />
+                            <span asp-validation-for="InvoiceReference" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Create Subscription</button>
+                        <a asp-action="Index" asp-route-group="software" asp-route-category="subscriptions" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            const vendorSelect = document.getElementById("@Html.IdFor(m => m.VendorId)");
+            const purchaseOrderSelect = document.getElementById("purchaseOrderSelect");
+            const purchaseOrderReferenceInput = document.getElementById("@Html.IdFor(m => m.PurchaseOrderReference)");
+            const invoiceReferenceInput = document.getElementById("invoiceReferenceInput");
+            const costInput = document.getElementById("costInput");
+            const getPurchaseOrdersUrl = "@getPurchaseOrdersUrl";
+            const getPurchaseOrderFinancialsUrl = "@getPurchaseOrderFinancialsUrl";
+
+            if (!purchaseOrderSelect || !purchaseOrderReferenceInput || !invoiceReferenceInput || !costInput) {
+                return;
+            }
+
+            const clearLinkedFields = (clearCost = true) => {
+                purchaseOrderReferenceInput.value = "";
+                invoiceReferenceInput.value = "";
+                if (clearCost) {
+                    costInput.value = "";
+                }
+            };
+
+            const destroyPoSearch = () => {
+                if (purchaseOrderSelect.tomselect) {
+                    purchaseOrderSelect.tomselect.destroy();
+                }
+            };
+
+            const initPoSearch = () => {
+                if (!window.TomSelect || purchaseOrderSelect.tomselect) {
+                    return;
+                }
+
+                const ts = new TomSelect(purchaseOrderSelect, {
+                    create: false,
+                    allowEmptyOption: true,
+                    searchField: ["text"],
+                    sortField: [{ field: "text", direction: "asc" }],
+                    placeholder: purchaseOrderSelect.dataset.placeholder || "Select or search purchase order",
+                    plugins: {
+                        clear_button: { title: "Clear selection" }
+                    }
+                });
+
+                ts.on("change", (value) => {
+                    void loadPurchaseOrderFinancials(value);
+                });
+            };
+
+            const repopulatePurchaseOrders = (orders, selectedPurchaseOrderId = "") => {
+                destroyPoSearch();
+                purchaseOrderSelect.innerHTML = "";
+
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Select or search purchase order";
+                purchaseOrderSelect.appendChild(defaultOption);
+
+                if (!orders || orders.length === 0) {
+                    const noOption = document.createElement("option");
+                    noOption.value = "";
+                    noOption.textContent = "No purchase orders found";
+                    purchaseOrderSelect.appendChild(noOption);
+                    clearLinkedFields();
+                    initPoSearch();
+                    return;
+                }
+
+                orders.forEach((po) => {
+                    const option = document.createElement("option");
+                    option.value = String(po.id);
+                    option.textContent = po.displayText || po.reference || "";
+                    purchaseOrderSelect.appendChild(option);
+                });
+
+                if (selectedPurchaseOrderId) {
+                    purchaseOrderSelect.value = String(selectedPurchaseOrderId);
+                }
+
+                initPoSearch();
+            };
+
+            const loadPurchaseOrderFinancials = async (purchaseOrderIdValue) => {
+                clearLinkedFields();
+                if (!purchaseOrderIdValue) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${getPurchaseOrderFinancialsUrl}?purchaseOrderId=${encodeURIComponent(purchaseOrderIdValue)}`, {
+                        headers: { Accept: "application/json" }
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+                    purchaseOrderReferenceInput.value = data.purchaseOrderReference ?? "";
+                    invoiceReferenceInput.value = data.invoiceReference ?? "";
+                    costInput.value = data.cost ?? "";
+                } catch (_error) {
+                    clearLinkedFields();
+                }
+            };
+
+            const loadPurchaseOrders = async (selectedPurchaseOrderId = "") => {
+                clearLinkedFields();
+
+                try {
+                    let url = getPurchaseOrdersUrl;
+                    if (vendorSelect && vendorSelect.value) {
+                        const separator = url.includes("?") ? "&" : "?";
+                        url = `${url}${separator}vendorId=${encodeURIComponent(vendorSelect.value)}`;
+                    }
+
+                    const response = await fetch(url, { headers: { Accept: "application/json" } });
+                    if (!response.ok) {
+                        repopulatePurchaseOrders([], "");
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const orders = Array.isArray(data) ? data : [];
+                    repopulatePurchaseOrders(orders, selectedPurchaseOrderId);
+
+                    const currentValue = selectedPurchaseOrderId || purchaseOrderSelect.value;
+                    if (currentValue) {
+                        await loadPurchaseOrderFinancials(currentValue);
+                    }
+                } catch (_error) {
+                    repopulatePurchaseOrders([], "");
+                }
+            };
+
+            const initialize = async () => {
+                const selectedPurchaseOrder = purchaseOrderSelect.dataset.selected || "";
+                await loadPurchaseOrders(selectedPurchaseOrder);
+            };
+
+            if (vendorSelect) {
+                vendorSelect.addEventListener("change", async () => {
+                    await loadPurchaseOrders("");
+                });
+            }
+
+            purchaseOrderSelect.addEventListener("change", () => {
+                if (!purchaseOrderSelect.tomselect) {
+                    void loadPurchaseOrderFinancials(purchaseOrderSelect.value);
+                }
+            });
+
+            void initialize();
+        })();
+    </script>
+}

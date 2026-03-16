@@ -1,0 +1,28 @@
+@model AssetTracker.Models.Vendors.ViewModels.PurchaseRequestUpsertVm
+
+@{
+    ViewData["Title"] = "Edit Purchase Request";
+    ViewData["FormAction"] = "Edit";
+    ViewData["CancelAction"] = "Index";
+    ViewData["IsEdit"] = true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xxl-11">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Edit Purchase Request</h1>
+                <p class="text-muted mb-0">Update request details before it is converted into a purchase order.</p>
+            </div>
+            <div class="card-body">
+                <partial name="_Form" model="Model" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

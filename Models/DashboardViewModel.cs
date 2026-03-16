@@ -6,6 +6,7 @@ public class DashboardVm
     public int InStock { get; set; }
     public int Assigned { get; set; }
     public int InRepair { get; set; }
+    public int Retired { get; set; }
     public int OpenIssues { get; set; }
     public int CriticalIssues { get; set; }
     public List<DepartmentAllocationVm> AllocationByDepartment { get; set; } = new();

@@ -30,6 +30,10 @@ namespace AssetTracker.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AssetStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("AssetTag")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -40,45 +44,191 @@ namespace AssetTracker.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("AssignedToUserOrDepartment")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("BillingCycle")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
                     b.Property<string>("Brand")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("BuildNumber")
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
 
                     b.Property<string>("Condition")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<decimal?>("Cost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("DeploymentEnvironment")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("Edition")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("InstalledDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("InstalledOn")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("InvoiceReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("IssueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("LastUpdatedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LicenseKey")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("LicenseType")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("MaintainerOrVendor")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("OpenSourceLicenseType")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PatchStatus")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PlanOrTier")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PreviousOwner")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<DateTime?>("PurchaseDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PurchaseOrderReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("RenewalReminderDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("ReturnDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("SecurityStatus")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("SoftwareCategory")
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("SoftwareName")
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("SoftwareNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("SoftwareStatus")
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("SoftwareVersion")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
                     b.Property<string>("Specifications")
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("SubCategory")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<DateTime?>("SupportEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TopLevelCategory")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("VendorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("WarrantyEndDate")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AssetTag")
                         .IsUnique();
+
+                    b.HasIndex("VendorId");
 
                     b.ToTable("Assets");
                 });
@@ -139,6 +289,11 @@ namespace AssetTracker.Migrations
                     b.Property<string>("AssignedToUserId")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -150,11 +305,6 @@ namespace AssetTracker.Migrations
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -202,6 +352,11 @@ namespace AssetTracker.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("Designation")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
                     b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -209,6 +364,10 @@ namespace AssetTracker.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("Location")
                         .HasMaxLength(120)
                         .HasColumnType("varchar(120)");
 
@@ -226,6 +385,541 @@ namespace AssetTracker.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("StaffProfiles");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PoNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<int?>("PurchaseRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PoNumber")
+                        .IsUnique();
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("PurchaseOrders");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseOrderLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PurchaseOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.ToTable("PurchaseOrderLines");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ApprovedByUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Justification")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime?>("NeededByDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("PrNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("RejectedReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("RequestedByStaffId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrNumber")
+                        .IsUnique();
+
+                    b.HasIndex("RequestedByStaffId");
+
+                    b.ToTable("PurchaseRequests");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseRequestLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<decimal?>("EstimatedTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("EstimatedUnitCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("LineType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<int>("PurchaseRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SuggestedVendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.HasIndex("SuggestedVendorId");
+
+                    b.ToTable("PurchaseRequestLines");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.Vendor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountManagerEmail")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("AccountManagerName")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("AccountManagerPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ArchiveReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ArchivedByUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsPreferredVendor")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PhysicalAddress")
+                        .HasMaxLength(400)
+                        .HasColumnType("varchar(400)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("VendorCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorCode")
+                        .IsUnique();
+
+                    b.ToTable("Vendors");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AlertBeforeDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ContractNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("ContractTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("ContractType")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal?>("ContractValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("SignedBy")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<DateTime?>("SignedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("VendorContracts");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("VendorDocuments");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorInvoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime?>("PaidDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int?>("PurchaseOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("VendorId", "InvoiceNumber")
+                        .IsUnique();
+
+                    b.ToTable("VendorInvoices");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorSupportTicket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AssetId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ClosedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime>("OpenedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("TicketNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("TicketNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("VendorSupportTickets");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -428,6 +1122,16 @@ namespace AssetTracker.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AssetTracker.Models.Asset", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("Assets")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("AssetTracker.Models.Assignment", b =>
                 {
                     b.HasOne("AssetTracker.Models.Asset", "Asset")
@@ -490,6 +1194,121 @@ namespace AssetTracker.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseOrder", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.PurchaseRequest", "PurchaseRequest")
+                        .WithMany("PurchaseOrders")
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("PurchaseOrders")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseRequest");
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseOrderLine", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("Lines")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseOrder");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseRequest", b =>
+                {
+                    b.HasOne("AssetTracker.Models.StaffProfile", "RequestedByStaff")
+                        .WithMany()
+                        .HasForeignKey("RequestedByStaffId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("RequestedByStaff");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseRequestLine", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.PurchaseRequest", "PurchaseRequest")
+                        .WithMany("Lines")
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "SuggestedVendor")
+                        .WithMany()
+                        .HasForeignKey("SuggestedVendorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("PurchaseRequest");
+
+                    b.Navigation("SuggestedVendor");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorContract", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("Contracts")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorDocument", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("Documents")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorInvoice", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Vendors.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("Invoices")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("Invoices")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseOrder");
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.VendorSupportTicket", b =>
+                {
+                    b.HasOne("AssetTracker.Models.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AssetTracker.Models.Vendors.Vendor", "Vendor")
+                        .WithMany("SupportTickets")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -539,6 +1358,35 @@ namespace AssetTracker.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseOrder", b =>
+                {
+                    b.Navigation("Invoices");
+
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.PurchaseRequest", b =>
+                {
+                    b.Navigation("Lines");
+
+                    b.Navigation("PurchaseOrders");
+                });
+
+            modelBuilder.Entity("AssetTracker.Models.Vendors.Vendor", b =>
+                {
+                    b.Navigation("Assets");
+
+                    b.Navigation("Contracts");
+
+                    b.Navigation("Documents");
+
+                    b.Navigation("Invoices");
+
+                    b.Navigation("PurchaseOrders");
+
+                    b.Navigation("SupportTickets");
                 });
 #pragma warning restore 612, 618
         }

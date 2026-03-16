@@ -1,0 +1,109 @@
+@model AssetTracker.Models.Assets.EditOpenSourceVm
+
+@{
+    ViewData["Title"] = "Edit Open Source Asset";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Edit Open Source Asset</h1>
+                <p class="text-muted mb-0">Update deployment environment, security state, and maintainer context.</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditOpenSource" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input asp-for="Id" type="hidden" />
+
+                    <h2 class="h6 text-muted mb-3">Open Source Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="AssetTag" class="form-label"></label>
+                            <input asp-for="AssetTag" class="form-control" />
+                            <span asp-validation-for="AssetTag" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Version" class="form-label"></label>
+                            <input asp-for="Version" class="form-control" />
+                            <span asp-validation-for="Version" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="OpenSourceLicenseType" class="form-label"></label>
+                            <input asp-for="OpenSourceLicenseType" class="form-control" />
+                            <span asp-validation-for="OpenSourceLicenseType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MaintainerOrVendor" class="form-label"></label>
+                            <input asp-for="MaintainerOrVendor" class="form-control" />
+                            <span asp-validation-for="MaintainerOrVendor" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label"></label>
+                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareStatus>()" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Deployment and Security</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="VendorId" class="form-label">Linked Vendor (optional)</label>
+                            <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                <option value="">No vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="InstalledOn" class="form-label"></label>
+                            <input asp-for="InstalledOn" class="form-control" />
+                            <span asp-validation-for="InstalledOn" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Location" class="form-label"></label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="DeploymentEnvironment" class="form-label"></label>
+                            <select asp-for="DeploymentEnvironment" asp-items="Html.GetEnumSelectList<AssetTracker.Models.SoftwareDeploymentEnvironment>()" class="form-select">
+                                <option value="">Not set</option>
+                            </select>
+                            <span asp-validation-for="DeploymentEnvironment" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="SecurityStatus" class="form-label"></label>
+                            <input asp-for="SecurityStatus" class="form-control" />
+                            <span asp-validation-for="SecurityStatus" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="LastUpdatedDate" class="form-label"></label>
+                            <input asp-for="LastUpdatedDate" type="date" class="form-control" />
+                            <span asp-validation-for="LastUpdatedDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

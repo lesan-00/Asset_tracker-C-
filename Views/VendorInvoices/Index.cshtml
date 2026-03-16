@@ -1,0 +1,101 @@
+@model AssetTracker.Models.Vendors.ViewModels.VendorInvoiceIndexVm
+
+@{
+    ViewData["Title"] = "Invoices";
+
+    static string StatusBadge(AssetTracker.Models.Vendors.InvoicePaymentStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Pending => "text-bg-warning",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Paid => "text-bg-success",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue => "text-bg-danger",
+        AssetTracker.Models.Vendors.InvoicePaymentStatus.Cancelled => "text-bg-secondary",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Invoices</h1>
+        <p class="text-muted mb-0">Track vendor invoices, due dates, and payment status.</p>
+    </div>
+    <a asp-controller="Vendors" asp-action="Index" class="btn btn-outline-primary">Go to Vendors</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100"><div class="card-body"><div class="text-muted small">Total Invoices</div><div class="h3 mb-0">@Model.TotalInvoices</div></div></div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100"><div class="card-body"><div class="text-muted small">Pending</div><div class="h3 mb-0">@Model.PendingInvoices</div></div></div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100"><div class="card-body"><div class="text-muted small">Overdue</div><div class="h3 mb-0">@Model.OverdueInvoices</div></div></div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100"><div class="card-body"><div class="text-muted small">Paid</div><div class="h3 mb-0">@Model.PaidInvoices</div></div></div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body border-bottom">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-12 col-lg-5">
+                <input type="search" name="q" value="@Model.Query" class="form-control" placeholder="Search invoice number, vendor, linked PO..." />
+            </div>
+            <div class="col-12 col-lg-4">
+                <select asp-for="StatusFilter" name="status" class="form-select" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.InvoicePaymentStatus>()">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Invoice</th>
+                    <th>Invoice Date</th>
+                    <th>Due Date</th>
+                    <th>Vendor</th>
+                    <th>PO</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No invoices found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.Items)
+                    {
+                        var overdueRow = item.EffectiveStatus == AssetTracker.Models.Vendors.InvoicePaymentStatus.Overdue ? "table-danger" : string.Empty;
+
+                        <tr class="@overdueRow">
+                            <td class="fw-semibold">@item.InvoiceNumber</td>
+                            <td>@item.InvoiceDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.DueDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.VendorName</td>
+                            <td>@item.LinkedPoNumber</td>
+                            <td><span class="badge @StatusBadge(item.EffectiveStatus)">@item.EffectiveStatus</span></td>
+                            <td class="text-end">@item.Currency @item.Amount.ToString("N2")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">View</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

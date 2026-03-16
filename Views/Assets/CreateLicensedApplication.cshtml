@@ -1,0 +1,433 @@
+@model AssetTracker.Models.Assets.CreateLicensedApplicationVm
+
+@{
+    ViewData["Title"] = "Create Licensed Application";
+    var getVendorPurchaseOrdersUrl = Url.Action("GetVendorPurchaseOrders", "Assets") ?? string.Empty;
+    var getPurchaseOrderInvoiceUrl = Url.Action("GetPurchaseOrderInvoice", "Assets") ?? string.Empty;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h1 class="h4 mb-1">Create Licensed Application</h1>
+                <p class="text-muted mb-0">Software identity, licensing, assignment, lifecycle, and financial details.</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateLicensedApplication" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <h2 class="h6 text-muted mb-3">Software Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="AssetTag" class="form-label">Asset Tag</label>
+                            <input asp-for="AssetTag" class="form-control" readonly />
+                            <span asp-validation-for="AssetTag" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" maxlength="150" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Version" class="form-label">Version</label>
+                            <input asp-for="Version" class="form-control" maxlength="50" />
+                            <span asp-validation-for="Version" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VendorId" class="form-label">Vendor</label>
+                            <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                <option value="">No vendor</option>
+                            </select>
+                            <span asp-validation-for="VendorId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select asp-for="Status" asp-items="ViewBag.LicensedStatusOptions" class="form-select"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Licensing Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="LicenseType" class="form-label">License Type <span class="text-danger">*</span></label>
+                            <select asp-for="LicenseType" asp-items="ViewBag.LicensedTypeOptions" class="form-select">
+                                <option value="">Select license type</option>
+                            </select>
+                            <span asp-validation-for="LicenseType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="LicenseKey" class="form-label">License Key</label>
+                            <input asp-for="LicenseKey" class="form-control" maxlength="255" />
+                            <span asp-validation-for="LicenseKey" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Assignment and Lifecycle</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="InstalledDate" class="form-label">Installed Date</label>
+                            <input asp-for="InstalledDate" type="date" class="form-control" />
+                            <span asp-validation-for="InstalledDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PurchaseDate" class="form-label"></label>
+                            <input asp-for="PurchaseDate" type="date" class="form-control" />
+                            <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ExpiryDate" class="form-label" id="expiry-date-label">Expiry Date</label>
+                            <input asp-for="ExpiryDate" type="date" class="form-control" />
+                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="RenewalReminderDate" class="form-label"></label>
+                            <input asp-for="RenewalReminderDate" type="date" class="form-control" />
+                            <span asp-validation-for="RenewalReminderDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 text-muted mb-3">Financial Information</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="Cost" class="form-label">Cost</label>
+                            <input asp-for="Cost" type="number" min="0" step="0.01" class="form-control" />
+                            <span asp-validation-for="Cost" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Currency" class="form-label">Currency <span class="text-danger">*</span></label>
+                            <select asp-for="Currency" asp-items="ViewBag.LicensedCurrencyOptions" class="form-select"></select>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PurchaseOrderId" class="form-label">Purchase Order</label>
+                            <select asp-for="PurchaseOrderId"
+                                    class="form-select"
+                                    id="purchaseOrderSelect"
+                                    data-placeholder="Select or search purchase order"
+                                    data-selected="@Model.PurchaseOrderId"
+                                    disabled>
+                                <option value="">Select or search purchase order</option>
+                            </select>
+                            <span asp-validation-for="PurchaseOrderId" class="text-danger"></span>
+                            <input asp-for="PurchaseOrderReference" type="hidden" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="InvoiceReference" class="form-label"></label>
+                            <input asp-for="InvoiceReference" class="form-control" id="invoiceReferenceInput" readonly placeholder="Auto-filled from selected PO" />
+                            <span asp-validation-for="InvoiceReference" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Create Licensed Application</button>
+                        <a asp-action="Index" asp-route-group="software" asp-route-category="licensed-applications" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (function () {
+            const licenseType = document.getElementById("@Html.IdFor(m => m.LicenseType)");
+            const installedDate = document.getElementById("@Html.IdFor(m => m.InstalledDate)");
+            const purchaseDate = document.getElementById("@Html.IdFor(m => m.PurchaseDate)");
+            const expiryDate = document.getElementById("@Html.IdFor(m => m.ExpiryDate)");
+            const renewalReminderDate = document.getElementById("@Html.IdFor(m => m.RenewalReminderDate)");
+            const expiryLabel = document.getElementById("expiry-date-label");
+            const vendorSelect = document.getElementById("@Html.IdFor(m => m.VendorId)");
+            const purchaseOrderSelect = document.getElementById("purchaseOrderSelect");
+            const purchaseOrderReference = document.getElementById("@Html.IdFor(m => m.PurchaseOrderReference)");
+            const invoiceReference = document.getElementById("invoiceReferenceInput");
+            const costInput = document.getElementById("@Html.IdFor(m => m.Cost)");
+            const getVendorPurchaseOrdersUrl = "@getVendorPurchaseOrdersUrl";
+            const getPurchaseOrderInvoiceUrl = "@getPurchaseOrderInvoiceUrl";
+
+            if (!licenseType || !expiryDate || !renewalReminderDate) {
+                return;
+            }
+
+            const isExpiryRequiredLicense = (value) => value === "Subscription" || value === "Trial";
+
+            const applyExpiryRequiredUi = () => {
+                const required = isExpiryRequiredLicense(licenseType.value);
+                expiryDate.required = required;
+                if (expiryLabel) {
+                    expiryLabel.innerHTML = required
+                        ? 'Expiry Date <span class="text-danger">*</span>'
+                        : 'Expiry Date';
+                }
+            };
+
+            const autofillReminderDate = () => {
+                if (!expiryDate.value || renewalReminderDate.value) {
+                    return;
+                }
+
+                const expiry = new Date(expiryDate.value + "T00:00:00");
+                if (Number.isNaN(expiry.getTime())) {
+                    return;
+                }
+
+                expiry.setDate(expiry.getDate() - 30);
+                const y = expiry.getFullYear();
+                const m = String(expiry.getMonth() + 1).padStart(2, "0");
+                const d = String(expiry.getDate()).padStart(2, "0");
+                renewalReminderDate.value = `${y}-${m}-${d}`;
+            };
+
+            const validatePurchaseVsExpiry = () => {
+                if (!purchaseDate || !purchaseDate.value || !expiryDate.value) {
+                    expiryDate.setCustomValidity("");
+                    return;
+                }
+
+                if (expiryDate.value < purchaseDate.value) {
+                    expiryDate.setCustomValidity("Expiry Date cannot be before Purchase Date.");
+                } else {
+                    expiryDate.setCustomValidity("");
+                }
+            };
+
+            const validateInstalledDate = () => {
+                if (!installedDate) {
+                    return;
+                }
+
+                installedDate.setCustomValidity("");
+
+                if (!installedDate.value) {
+                    return;
+                }
+
+                const today = new Date();
+                const todayValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+                if (installedDate.value > todayValue) {
+                    installedDate.setCustomValidity("Installed Date cannot be later than today.");
+                    return;
+                }
+
+                if (expiryDate.value && installedDate.value > expiryDate.value) {
+                    installedDate.setCustomValidity("Installed Date cannot be later than Expiry Date.");
+                }
+            };
+
+            const clearInvoiceReference = () => {
+                if (invoiceReference) {
+                    invoiceReference.value = "";
+                }
+            };
+
+            const clearCost = () => {
+                if (costInput) {
+                    costInput.value = "";
+                }
+            };
+
+            const clearPurchaseOrderReference = () => {
+                if (purchaseOrderReference) {
+                    purchaseOrderReference.value = "";
+                }
+            };
+
+            const resetPurchaseOrderLinkedValues = (clearCostField = true) => {
+                clearPurchaseOrderReference();
+                clearInvoiceReference();
+                if (clearCostField) {
+                    clearCost();
+                }
+            };
+
+            const destroyPurchaseOrderSearch = () => {
+                if (purchaseOrderSelect && purchaseOrderSelect.tomselect) {
+                    purchaseOrderSelect.tomselect.destroy();
+                }
+            };
+
+            const initPurchaseOrderSearch = () => {
+                if (!purchaseOrderSelect || purchaseOrderSelect.disabled || !window.TomSelect || purchaseOrderSelect.tomselect) {
+                    return;
+                }
+
+                const ts = new TomSelect(purchaseOrderSelect, {
+                    create: false,
+                    allowEmptyOption: true,
+                    searchField: ["text"],
+                    sortField: [{ field: "text", direction: "asc" }],
+                    placeholder: purchaseOrderSelect.dataset.placeholder || "Select or search purchase order",
+                    plugins: {
+                        clear_button: { title: "Clear selection" }
+                    }
+                });
+
+                ts.on("change", (value) => {
+                    void loadInvoiceReference(value);
+                });
+            };
+
+            const repopulatePurchaseOrderOptions = (orders, selectedPurchaseOrderId = "") => {
+                if (!purchaseOrderSelect) {
+                    return;
+                }
+
+                destroyPurchaseOrderSearch();
+                purchaseOrderSelect.innerHTML = "";
+
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Select or search purchase order";
+                purchaseOrderSelect.appendChild(defaultOption);
+
+                if (!orders || orders.length === 0) {
+                    const noOption = document.createElement("option");
+                    noOption.value = "";
+                    noOption.textContent = "No purchase orders found";
+                    purchaseOrderSelect.appendChild(noOption);
+                    purchaseOrderSelect.disabled = true;
+                    resetPurchaseOrderLinkedValues();
+                    return;
+                }
+
+                orders.forEach((po) => {
+                    const option = document.createElement("option");
+                    option.value = String(po.id);
+                    option.textContent = po.displayText || po.reference || "";
+                    purchaseOrderSelect.appendChild(option);
+                });
+
+                purchaseOrderSelect.disabled = false;
+                if (selectedPurchaseOrderId) {
+                    purchaseOrderSelect.value = String(selectedPurchaseOrderId);
+                }
+
+                initPurchaseOrderSearch();
+            };
+
+            const loadInvoiceReference = async (purchaseOrderIdValue) => {
+                resetPurchaseOrderLinkedValues();
+                if (!purchaseOrderIdValue) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${getPurchaseOrderInvoiceUrl}?purchaseOrderId=${encodeURIComponent(purchaseOrderIdValue)}`, {
+                        headers: { Accept: "application/json" }
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (purchaseOrderReference) {
+                        purchaseOrderReference.value = data.purchaseOrderReference ?? "";
+                    }
+                    if (invoiceReference) {
+                        invoiceReference.value = data.invoiceReference ?? "";
+                    }
+                    if (costInput) {
+                        costInput.value = data.invoiceAmount ?? "";
+                    }
+                } catch (_error) {
+                    resetPurchaseOrderLinkedValues();
+                }
+            };
+
+            const loadVendorPurchaseOrders = async (vendorId, selectedPurchaseOrderId = "") => {
+                if (!purchaseOrderSelect) {
+                    return;
+                }
+
+                resetPurchaseOrderLinkedValues();
+                if (!vendorId) {
+                    repopulatePurchaseOrderOptions([], "");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${getVendorPurchaseOrdersUrl}?vendorId=${encodeURIComponent(vendorId)}`, {
+                        headers: { Accept: "application/json" }
+                    });
+
+                    if (!response.ok) {
+                        repopulatePurchaseOrderOptions([], "");
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const orders = Array.isArray(data) ? data : [];
+                    repopulatePurchaseOrderOptions(orders, selectedPurchaseOrderId);
+
+                    const currentValue = selectedPurchaseOrderId || purchaseOrderSelect.value;
+                    if (currentValue) {
+                        await loadInvoiceReference(currentValue);
+                    }
+                } catch (_error) {
+                    repopulatePurchaseOrderOptions([], "");
+                }
+            };
+
+            const initializePurchaseOrderFlow = async () => {
+                if (!vendorSelect || !purchaseOrderSelect) {
+                    return;
+                }
+
+                const selectedPurchaseOrder = purchaseOrderSelect.dataset.selected || "";
+                if (!vendorSelect.value) {
+                    repopulatePurchaseOrderOptions([], "");
+                    return;
+                }
+
+                await loadVendorPurchaseOrders(vendorSelect.value, selectedPurchaseOrder);
+            };
+
+            licenseType.addEventListener("change", () => {
+                applyExpiryRequiredUi();
+                validatePurchaseVsExpiry();
+                validateInstalledDate();
+            });
+
+            expiryDate.addEventListener("change", () => {
+                autofillReminderDate();
+                validatePurchaseVsExpiry();
+                validateInstalledDate();
+            });
+
+            if (purchaseDate) {
+                purchaseDate.addEventListener("change", validatePurchaseVsExpiry);
+            }
+
+            if (installedDate) {
+                installedDate.addEventListener("change", validateInstalledDate);
+            }
+
+            if (vendorSelect && purchaseOrderSelect) {
+                vendorSelect.addEventListener("change", async () => {
+                    await loadVendorPurchaseOrders(vendorSelect.value, "");
+                });
+
+                purchaseOrderSelect.addEventListener("change", () => {
+                    if (!purchaseOrderSelect.tomselect) {
+                        void loadInvoiceReference(purchaseOrderSelect.value);
+                    }
+                });
+            }
+
+            applyExpiryRequiredUi();
+            validatePurchaseVsExpiry();
+            validateInstalledDate();
+            void initializePurchaseOrderFlow();
+        })();
+    </script>
+}

@@ -1,0 +1,212 @@
+@model AssetTracker.Models.Vendors.ViewModels.VendorIndexVm
+
+@{
+    ViewData["Title"] = "Vendors";
+
+    static string StatusBadge(AssetTracker.Models.Vendors.VendorStatus status) => status switch
+    {
+        AssetTracker.Models.Vendors.VendorStatus.Active => "text-bg-success",
+        AssetTracker.Models.Vendors.VendorStatus.Inactive => "text-bg-secondary",
+        AssetTracker.Models.Vendors.VendorStatus.Blacklisted => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    static string ContractBadge(AssetTracker.Models.Vendors.ContractStatus? status) => status switch
+    {
+        AssetTracker.Models.Vendors.ContractStatus.Active => "text-bg-success",
+        AssetTracker.Models.Vendors.ContractStatus.PendingRenewal => "text-bg-warning",
+        AssetTracker.Models.Vendors.ContractStatus.Expired => "text-bg-danger",
+        AssetTracker.Models.Vendors.ContractStatus.Terminated => "text-bg-dark",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Vendor Management</h1>
+        <p class="text-muted mb-0">Manage suppliers, procurement records, contracts, and vendor support activity.</p>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Add Vendor</a>
+    }
+</div>
+
+<div class="mb-3 d-flex flex-wrap gap-2">
+    <a asp-action="Index"
+       asp-route-archiveView="active"
+       asp-route-q="@Model.Query"
+       asp-route-category="@Model.Category"
+       asp-route-status="@Model.Status"
+       asp-route-preferredOnly="@Model.PreferredOnly"
+       class="btn btn-sm @(Model.ArchiveView == "active" ? "btn-primary" : "btn-outline-primary")">Active</a>
+    <a asp-action="Index"
+       asp-route-archiveView="archived"
+       asp-route-q="@Model.Query"
+       asp-route-category="@Model.Category"
+       asp-route-status="@Model.Status"
+       asp-route-preferredOnly="@Model.PreferredOnly"
+       class="btn btn-sm @(Model.ArchiveView == "archived" ? "btn-primary" : "btn-outline-primary")">Archived</a>
+    <a asp-action="Index"
+       asp-route-archiveView="all"
+       asp-route-q="@Model.Query"
+       asp-route-category="@Model.Category"
+       asp-route-status="@Model.Status"
+       asp-route-preferredOnly="@Model.PreferredOnly"
+       class="btn btn-sm @(Model.ArchiveView == "all" ? "btn-primary" : "btn-outline-primary")">All</a>
+</div>
+
+@if (TempData["VendorWarning"] is string warning)
+{
+    <div class="alert alert-warning">@warning</div>
+}
+@if (TempData["VendorSuccess"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Vendors</div>
+                <div class="h3 mb-0">@Model.Kpis.TotalVendors</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Active Contracts</div>
+                <div class="h3 mb-0">@Model.Kpis.ActiveContracts</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Pending Invoices</div>
+                <div class="h3 mb-0">@Model.Kpis.PendingInvoices</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Spend (KES)</div>
+                <div class="h3 mb-0">@Model.Kpis.TotalSpend.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body border-bottom">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <input type="hidden" name="archiveView" value="@Model.ArchiveView" />
+            <div class="col-12 col-lg-4">
+                <input type="search" name="q" value="@Model.Query" class="form-control" placeholder="Search vendor code, company, email, phone..." />
+            </div>
+            <div class="col-6 col-lg-3">
+                <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.VendorCategory>()">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-3">
+                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<AssetTracker.Models.Vendors.VendorStatus>()">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-2 d-flex align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="preferredOnly" value="true" id="preferredOnly" @(Model.PreferredOnly ? "checked" : "") />
+                    <label class="form-check-label" for="preferredOnly">Preferred only</label>
+                </div>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a asp-action="Index" asp-route-archiveView="@Model.ArchiveView" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Vendor ID</th>
+                    <th>Company Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Archived At</th>
+                    <th>Preferred Vendor</th>
+                    <th>Last Transaction Date</th>
+                    <th>Contract Status</th>
+                    <th>Spend Amount</th>
+                    <th class="text-end">Quick Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">No vendors found for the current filter.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.VendorCode</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="fw-semibold text-decoration-none">@item.CompanyName</a>
+                                @if (item.IsArchived)
+                                {
+                                    <span class="badge text-bg-dark ms-2">Archived</span>
+                                }
+                            </td>
+                            <td>@item.Category</td>
+                            <td><span class="badge @StatusBadge(item.Status)">@item.Status</span></td>
+                            <td>@(item.ArchivedAt.HasValue ? item.ArchivedAt.Value.ToString("dd MMM yyyy") : "-")</td>
+                            <td>
+                                @if (item.IsPreferredVendor)
+                                {
+                                    <span class="badge text-bg-info">Preferred</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No</span>
+                                }
+                            </td>
+                            <td>@(item.LastTransactionDate.HasValue ? item.LastTransactionDate.Value.ToString("dd MMM yyyy") : "Not available")</td>
+                            <td><span class="badge @ContractBadge(item.ContractStatus)">@item.ContractStatus?.ToString() ?? "No contract"</span></td>
+                            <td>@item.SpendAmount.ToString("N2")</td>
+                            <td class="text-end">
+                                @if (item.IsArchived)
+                                {
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-dark">View</a>
+                                        <form asp-action="Restore" asp-route-id="@item.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success">Restore</button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-controller="PurchaseRequests" asp-action="Create" asp-route-suggestedVendorId="@item.Id" class="btn btn-outline-primary">New PR</a>
+                                        <a asp-controller="VendorInvoices" asp-action="Create" asp-route-vendorId="@item.Id" class="btn btn-outline-secondary">Log Invoice</a>
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-dark">View</a>
+                                        <a asp-action="Archive" asp-route-id="@item.Id" class="btn btn-outline-danger">Archive</a>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

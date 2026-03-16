@@ -2,6 +2,13 @@
 
 @{
     ViewData["Title"] = "Edit Asset";
+    var taxonomyJson = ViewData["AssetTaxonomyJson"] as string ?? "[]";
+    var hideTaxonomySelectors = (bool?)ViewData["HideTaxonomySelectors"] ?? false;
+    var isPhysicalContext = (bool?)ViewData["IsPhysicalContext"] ?? false;
+    var physicalLegacyAssetType = ViewData["PhysicalLegacyAssetType"] as string;
+    var hasActiveAssignment = (bool?)ViewData["HasActiveAssignment"] ?? false;
+    var statusOptions = ViewData["AssetStatusOptions"] as IEnumerable<SelectListItem>
+        ?? Html.GetEnumSelectList<AssetTracker.Models.AssetStatus>();
 }
 
 <div class="row justify-content-center">
@@ -15,57 +22,178 @@
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="CreatedAt" />
+                    @if (hasActiveAssignment)
+                    {
+                        <div class="alert alert-info py-2 mb-3">
+                            This asset is currently assigned and cannot be retired until it is returned or unassigned.
+                        </div>
+                    }
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label asp-for="AssetType" class="form-label"></label>
-                            <select asp-for="AssetType" asp-items="Html.GetEnumSelectList<AssetTracker.Models.AssetType>()" class="form-select"></select>
-                            <span asp-validation-for="AssetType" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="Status" class="form-label"></label>
-                            <select asp-for="Status" asp-items="Html.GetEnumSelectList<AssetTracker.Models.AssetStatus>()" class="form-select"></select>
-                            <span asp-validation-for="Status" class="text-danger"></span>
-                        </div>
+                        @if (hideTaxonomySelectors)
+                        {
+                            <input asp-for="TopLevelCategory" type="hidden" />
+                            <input asp-for="Category" type="hidden" />
+                            <input asp-for="SubCategory" type="hidden" />
+                        }
+                        else
+                        {
+                            <div class="col-md-4">
+                                <label asp-for="TopLevelCategory" class="form-label">Top Category</label>
+                                <select asp-for="TopLevelCategory"
+                                        id="TopLevelCategory"
+                                        class="form-select"
+                                        data-selected="@ViewData["SelectedTopLevelCategory"]">
+                                </select>
+                                <span asp-validation-for="TopLevelCategory" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Category" class="form-label">Category</label>
+                                <select asp-for="Category"
+                                        id="Category"
+                                        class="form-select"
+                                        data-selected="@ViewData["SelectedCategory"]">
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="SubCategory" class="form-label">Subcategory</label>
+                                <select asp-for="SubCategory"
+                                        id="SubCategory"
+                                        class="form-select"
+                                        data-selected="@ViewData["SelectedSubCategory"]">
+                                </select>
+                                <span asp-validation-for="SubCategory" class="text-danger"></span>
+                            </div>
+                        }
 
-                        <div class="col-md-6">
-                            <label asp-for="Brand" class="form-label"></label>
-                            <input asp-for="Brand" class="form-control" />
-                            <span asp-validation-for="Brand" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="Model" class="form-label"></label>
-                            <input asp-for="Model" class="form-control" />
-                            <span asp-validation-for="Model" class="text-danger"></span>
-                        </div>
+                        @if (isPhysicalContext)
+                        {
+                            <input asp-for="Brand" type="hidden" />
+                            <input asp-for="Model" type="hidden" />
+                            <input asp-for="SerialNumber" type="hidden" />
+                            <input asp-for="Condition" type="hidden" />
+                            <input asp-for="VendorId" type="hidden" />
+                            <input asp-for="Specifications" type="hidden" />
+                            <input asp-for="PurchaseDate" type="hidden" />
+                            <input asp-for="IssueDate" type="hidden" />
+                            <input asp-for="ReturnDate" type="hidden" />
+                            <input asp-for="WarrantyEndDate" type="hidden" />
 
-                        <div class="col-md-6">
-                            <label asp-for="AssetTag" class="form-label"></label>
-                            <input asp-for="AssetTag" class="form-control" />
-                            <span asp-validation-for="AssetTag" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="SerialNumber" class="form-label"></label>
-                            <input asp-for="SerialNumber" class="form-control" />
-                            <span asp-validation-for="SerialNumber" class="text-danger"></span>
-                        </div>
+                            <div class="col-md-6">
+                                <label asp-for="AssetTag" class="form-label"></label>
+                                <input asp-for="AssetTag" class="form-control" />
+                                <span asp-validation-for="AssetTag" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AssetType" class="form-label"></label>
+                                <select asp-for="AssetType" class="form-select">
+                                    <option value="">Select asset type</option>
+                                    @if (!string.IsNullOrWhiteSpace(physicalLegacyAssetType))
+                                    {
+                                        <option value="@physicalLegacyAssetType">@physicalLegacyAssetType (Legacy)</option>
+                                    }
+                                    <option value="Chairs">Chairs</option>
+                                    <option value="Whiteboards">Whiteboards</option>
+                                    <option value="Desks">Desks</option>
+                                    <option value="Cabinets">Cabinets</option>
+                                    <option value="Tables">Tables</option>
+                                    <option value="Drawers">Drawers</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="AssetType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label"></label>
+                                <select asp-for="Status" asp-items="statusOptions" class="form-select"></select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Location" class="form-label"></label>
+                                <input asp-for="Location" class="form-control" />
+                                <span asp-validation-for="Location" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="AssetType" class="form-label"></label>
+                                <select asp-for="AssetType" asp-items="ViewBag.NonSoftwareAssetTypes" class="form-select"></select>
+                                <span asp-validation-for="AssetType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label"></label>
+                                <select asp-for="Status" asp-items="statusOptions" class="form-select"></select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
 
-                        <div class="col-md-6">
-                            <label asp-for="Location" class="form-label"></label>
-                            <input asp-for="Location" class="form-control" />
-                            <span asp-validation-for="Location" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="Condition" class="form-label"></label>
-                            <input asp-for="Condition" class="form-control" />
-                            <span asp-validation-for="Condition" class="text-danger"></span>
-                        </div>
+                            <div class="col-md-6">
+                                <label asp-for="Brand" class="form-label"></label>
+                                <input asp-for="Brand" class="form-control" />
+                                <span asp-validation-for="Brand" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Model" class="form-label"></label>
+                                <input asp-for="Model" class="form-control" />
+                                <span asp-validation-for="Model" class="text-danger"></span>
+                            </div>
 
-                        <div class="col-12">
-                            <label asp-for="Specifications" class="form-label"></label>
-                            <textarea asp-for="Specifications" class="form-control" rows="4"></textarea>
-                            <span asp-validation-for="Specifications" class="text-danger"></span>
-                        </div>
+                            <div class="col-md-6">
+                                <label asp-for="AssetTag" class="form-label"></label>
+                                <input asp-for="AssetTag" class="form-control" />
+                                <span asp-validation-for="AssetTag" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SerialNumber" class="form-label"></label>
+                                <input asp-for="SerialNumber" class="form-control" />
+                                <span asp-validation-for="SerialNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Location" class="form-label"></label>
+                                <input asp-for="Location" class="form-control" />
+                                <span asp-validation-for="Location" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Condition" class="form-label"></label>
+                                <input asp-for="Condition" class="form-control" />
+                                <span asp-validation-for="Condition" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="VendorId" class="form-label">Vendor</label>
+                                <select asp-for="VendorId" asp-items="ViewBag.VendorId" class="form-select searchable-vendor" data-placeholder="Search vendor...">
+                                    <option value="">No vendor link</option>
+                                </select>
+                                <span asp-validation-for="VendorId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PurchaseDate" class="form-label">Purchase Date</label>
+                                <input asp-for="PurchaseDate" type="date" class="form-control" />
+                                <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="IssueDate" class="form-label">Issue Date</label>
+                                <input asp-for="IssueDate" type="date" class="form-control" />
+                                <span asp-validation-for="IssueDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ReturnDate" class="form-label">Return Date</label>
+                                <input asp-for="ReturnDate" type="date" class="form-control" />
+                                <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="WarrantyEndDate" class="form-label">Warranty End Date</label>
+                                <input asp-for="WarrantyEndDate" type="date" class="form-control" />
+                                <span asp-validation-for="WarrantyEndDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Specifications" class="form-label"></label>
+                                <textarea asp-for="Specifications" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Specifications" class="text-danger"></span>
+                            </div>
+                        }
                     </div>
 
                     <div class="mt-4 d-flex gap-2">
@@ -81,5 +209,70 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    @if (!hideTaxonomySelectors)
+    {
+        <script>
+            (() => {
+                const taxonomy = @Html.Raw(taxonomyJson);
+                const topSelect = document.getElementById("TopLevelCategory");
+                const categorySelect = document.getElementById("Category");
+                const subCategorySelect = document.getElementById("SubCategory");
+
+                if (!topSelect || !categorySelect || !subCategorySelect) {
+                    return;
+                }
+
+                const selectedTop = topSelect.dataset.selected || "";
+                const selectedCategory = categorySelect.dataset.selected || "";
+                const selectedSubCategory = subCategorySelect.dataset.selected || "";
+
+                const addOption = (select, value, text) => {
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = text;
+                    select.appendChild(option);
+                };
+
+                const setOptions = (select, options, placeholder, selectedValue) => {
+                    select.innerHTML = "";
+                    addOption(select, "", placeholder);
+                    options.forEach(item => addOption(select, item.key, item.name));
+                    if (selectedValue) {
+                        select.value = selectedValue;
+                    }
+                };
+
+                const getNode = (key) => taxonomy.find(x => x.key === key);
+                const getChildNode = (topKey, categoryKey) => {
+                    const top = getNode(topKey);
+                    return top?.children?.find(x => x.key === categoryKey);
+                };
+
+                const refreshCategories = (selectedValue = "") => {
+                    const top = getNode(topSelect.value);
+                    const categories = top?.children || [];
+                    setOptions(categorySelect, categories, "Select category", selectedValue);
+                    refreshSubCategories("");
+                };
+
+                const refreshSubCategories = (selectedValue = "") => {
+                    const category = getChildNode(topSelect.value, categorySelect.value);
+                    const subCategories = category?.children || [];
+                    setOptions(subCategorySelect, subCategories, "Not applicable", selectedValue);
+                    subCategorySelect.disabled = subCategories.length === 0;
+                    if (subCategories.length === 0) {
+                        subCategorySelect.value = "";
+                    }
+                };
+
+                setOptions(topSelect, taxonomy, "Select top category", selectedTop);
+                refreshCategories(selectedCategory);
+                refreshSubCategories(selectedSubCategory);
+
+                topSelect.addEventListener("change", () => refreshCategories(""));
+                categorySelect.addEventListener("change", () => refreshSubCategories(""));
+            })();
+        </script>
     }
 }

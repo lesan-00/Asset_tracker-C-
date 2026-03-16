@@ -1,0 +1,100 @@
+@model AssetTracker.Models.Reports.ProcurementReportVm
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="mb-3 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+    <div>
+        <h1 class="h3 mb-1">@Model.Title</h1>
+        <p class="text-secondary mb-0">@Model.Description</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Reports</a>
+        <a asp-action="ProcurementExcel"
+           asp-route-reportType="@Model.ReportType"
+           asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))"
+           asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))"
+           asp-route-vendorId="@Model.VendorId"
+           asp-route-department="@Model.Department"
+           asp-route-search="@Model.Search"
+           class="btn btn-outline-secondary">Excel</a>
+        <a asp-action="ProcurementPdf"
+           asp-route-reportType="@Model.ReportType"
+           asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))"
+           asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))"
+           asp-route-vendorId="@Model.VendorId"
+           asp-route-department="@Model.Department"
+           asp-route-search="@Model.Search"
+           class="btn btn-outline-secondary">PDF</a>
+    </div>
+</div>
+
+<div class="alert alert-light border mb-3">
+    <div class="row g-2 small">
+        <div class="col-md-3"><span class="text-secondary">Date Range:</span> @(Model.From?.ToString("dd MMM yyyy") ?? "Any") - @(Model.To?.ToString("dd MMM yyyy") ?? "Any")</div>
+        <div class="col-md-3"><span class="text-secondary">Vendor:</span> @Model.VendorLabel</div>
+        <div class="col-md-3"><span class="text-secondary">Department:</span> @(string.IsNullOrWhiteSpace(Model.Department) ? "All" : Model.Department)</div>
+        <div class="col-md-3"><span class="text-secondary">Search:</span> @(string.IsNullOrWhiteSpace(Model.Search) ? "None" : Model.Search)</div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    @if (Model.SummaryCards.Count == 0)
+    {
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-muted">No summary metrics for this report.</div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var metric in Model.SummaryCards)
+        {
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="text-secondary small">@metric.Label</div>
+                        <div class="h5 mb-0">@metric.Value</div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    @foreach (var header in Model.Headers)
+                    {
+                        <th>@header</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Rows.Count == 0)
+                {
+                    <tr>
+                        <td class="text-center text-muted py-4" colspan="@Math.Max(Model.Headers.Count, 1)">No data found for the selected filters.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            @foreach (var cell in row)
+                            {
+                                <td>@cell</td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,4 +1,6 @@
-﻿html, body {
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+html, body {
   height: 100%;
 }
 
@@ -17,6 +19,7 @@ body {
   padding: 25px 12px !important;
   border-right: 3px solid #1f4fbf !important;
   box-shadow: 4px 0 10px rgba(0,0,0,0.15) !important;
+  transition: width .2s ease, padding .2s ease;
 }
 
 .sidebar-brand {
@@ -47,6 +50,52 @@ body {
   margin-right: 0.5rem;
   flex-shrink: 0;
   color: #ffffff;
+}
+
+.sidebar-link-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-collapse-toggle {
+  border: 0;
+  width: 100%;
+}
+
+body.sidebar-collapsed .app-sidebar {
+  width: 86px !important;
+  padding-left: 0.65rem !important;
+  padding-right: 0.65rem !important;
+}
+
+body.sidebar-collapsed .sidebar-brand,
+body.sidebar-collapsed .sidebar-link-label {
+  opacity: 0;
+  width: 0;
+  display: inline-block;
+  pointer-events: none;
+}
+
+body.sidebar-collapsed .app-sidebar .nav-link {
+  justify-content: center;
+}
+
+body.sidebar-collapsed .app-sidebar .nav-link i {
+  margin-right: 0 !important;
+}
+
+body.sidebar-collapsed .sidebar-assets-tree,
+body.sidebar-collapsed .sidebar-assets-toggle,
+body.sidebar-collapsed .sidebar-assets .sidebar-assets-badge,
+body.sidebar-collapsed .sidebar-procurement-tree,
+body.sidebar-collapsed .sidebar-procurement-toggle,
+body.sidebar-collapsed .sidebar-procurement .sidebar-assets-badge,
+body.sidebar-collapsed .sidebar-procurement-label,
+body.sidebar-collapsed .sidebar-procurement-marker,
+body.sidebar-collapsed .sidebar-asset-label,
+body.sidebar-collapsed .sidebar-asset-marker {
+  display: none !important;
 }
 
 /* Hover effect with slide animation */
@@ -112,6 +161,143 @@ body {
   font-weight: 700;
 }
 
+/* ===== Dashboard page (Asset Operations Overview) ===== */
+.dashboard-page {
+  display: grid;
+  gap: 24px;
+}
+
+.dashboard-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dashboard-title {
+  margin: 0;
+  color: #111827;
+}
+
+.dashboard-subtitle {
+  color: #6b7280;
+}
+
+.dashboard-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-section {
+  margin-top: 0;
+}
+
+.dashboard-kpi-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.dashboard-kpi-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-kpi-card {
+  background: #f0fdf4;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.dashboard-kpi-link:hover .dashboard-kpi-card,
+.dashboard-kpi-link:focus-visible .dashboard-kpi-card {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+  cursor: pointer;
+}
+
+.dashboard-kpi-card .kpi-label {
+  color: #374151;
+  font-weight: 600;
+}
+
+.dashboard-kpi-card .kpi-value {
+  color: #111827;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.dashboard-content-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-section-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.dashboard-section-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-page .section-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #111827;
+}
+
+.dashboard-section-body {
+  padding: 20px;
+}
+
+.dashboard-page .issue-list .issue-row {
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-page .issue-list .issue-row:last-child {
+  border-bottom: none;
+}
+
+.dashboard-page .issue-list .issue-row:hover {
+  color: inherit;
+  background: #f8fafc;
+}
+
+.dashboard-page .activity-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-page .activity-item:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 991.98px) {
   .app-sidebar {
     width: 86px;
@@ -125,6 +311,10 @@ body {
 
   .app-main {
     margin-left: 86px;
+  }
+
+  .sidebar-collapse-toggle {
+    display: none;
   }
 }
 
@@ -196,7 +386,7 @@ body {
 
 /* ===== Recent Activity: limit height and scroll ===== */
 .panel-list-scroll{
-  max-height: 260px;   /* adjust as needed: 220–320px */
+  max-height: 260px;   /* adjust as needed: 220�320px */
   overflow-y: auto;
 }
 
@@ -226,4 +416,430 @@ body {
     color: #1b5e20 !important;
     font-size: 1.9rem;
     font-weight: 700;
+}
+
+.kpi-card.kpi-card-retired{
+    background: #eceff3 !important;
+    border-color: #cfd8e3 !important;
+}
+
+.kpi-card.kpi-card-retired .kpi-label{
+    color: #374151 !important;
+}
+
+.kpi-card.kpi-card-retired .kpi-value{
+    color: #111827 !important;
+}
+
+/* ===== Assets taxonomy tree ===== */
+.asset-tree .asset-tree-item + .asset-tree-item {
+  margin-top: 0.1rem;
+}
+
+.asset-tree-toggle {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+}
+
+.asset-tree-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.asset-tree-toggle[aria-expanded="true"] i {
+  transform: rotate(90deg);
+}
+
+.asset-tree-spacer {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.asset-tree-link {
+  color: #374151;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.asset-tree-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.asset-tree-link.active {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.asset-tree-selected {
+  background: rgba(219, 234, 254, 0.45);
+}
+
+/* ===== Sidebar assets taxonomy ===== */
+.app-sidebar .sidebar-assets {
+  margin-top: 0.15rem;
+}
+
+.app-sidebar .sidebar-assets-parent {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 0.2rem;
+}
+
+.app-sidebar .sidebar-assets-parent.active {
+  background: rgba(31, 79, 191, 0.32);
+}
+
+.app-sidebar .sidebar-assets .nav-link {
+  margin-bottom: 0 !important;
+  padding: 0.55rem 0.6rem !important;
+  gap: 0.35rem;
+}
+
+.app-sidebar .sidebar-assets-badge {
+  background: rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.app-sidebar .sidebar-assets-toggle {
+  color: rgba(255, 255, 255, 0.75);
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.app-sidebar .sidebar-assets-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.app-sidebar .sidebar-assets-toggle[aria-expanded="true"] i {
+  transform: rotate(90deg);
+}
+
+.app-sidebar .sidebar-assets-tree {
+  margin-top: 0.25rem;
+}
+
+.app-sidebar .sidebar-asset-node {
+  margin-bottom: 0.1rem;
+}
+
+.app-sidebar .sidebar-asset-node > .d-flex {
+  border-radius: 7px;
+  padding-right: 0.2rem;
+}
+
+.app-sidebar .sidebar-asset-node.selected {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-sidebar .sidebar-asset-toggle {
+  color: rgba(255, 255, 255, 0.65);
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-sidebar .sidebar-asset-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.app-sidebar .sidebar-asset-toggle[aria-expanded="true"] i {
+  transform: rotate(90deg);
+}
+
+.app-sidebar .sidebar-asset-toggle-spacer {
+  width: 1.2rem;
+  height: 1.2rem;
+  display: inline-block;
+}
+
+.app-sidebar .sidebar-asset-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.84);
+  padding: 0.42rem 0.5rem;
+  border-radius: 7px;
+  width: 100%;
+  font-size: 0.86rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-sidebar .sidebar-asset-link:hover {
+  background: rgba(31, 79, 191, 0.3);
+  color: #fff;
+}
+
+.app-sidebar .sidebar-asset-link.active {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
+  font-weight: 600;
+}
+
+.app-sidebar .sidebar-asset-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar .sidebar-asset-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.app-sidebar .sidebar-asset-marker.marker-hardware {
+  background: #60a5fa;
+}
+
+.app-sidebar .sidebar-asset-marker.marker-software {
+  background: #34d399;
+}
+
+.app-sidebar .sidebar-asset-marker.marker-physical {
+  background: #fbbf24;
+}
+
+.app-sidebar .sidebar-asset-marker.marker-neutral {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ===== Sidebar procurement navigation ===== */
+.app-sidebar .sidebar-procurement {
+  margin-top: 0.15rem;
+}
+
+.app-sidebar .sidebar-procurement-parent {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 0.2rem;
+}
+
+.app-sidebar .sidebar-procurement-parent.active {
+  background: rgba(31, 79, 191, 0.32);
+}
+
+.app-sidebar .sidebar-procurement .nav-link {
+  margin-bottom: 0 !important;
+  padding: 0.55rem 0.6rem !important;
+  gap: 0.35rem;
+}
+
+.app-sidebar .sidebar-procurement-toggle {
+  color: rgba(255, 255, 255, 0.75);
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.app-sidebar .sidebar-procurement-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.app-sidebar .sidebar-procurement-toggle[aria-expanded="true"] i {
+  transform: rotate(90deg);
+}
+
+.app-sidebar .sidebar-procurement-tree {
+  margin-top: 0.25rem;
+}
+
+.app-sidebar .sidebar-procurement-node {
+  margin-bottom: 0.1rem;
+}
+
+.app-sidebar .sidebar-procurement-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.84);
+  padding: 0.42rem 0.5rem;
+  border-radius: 7px;
+  width: 100%;
+  font-size: 0.86rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-sidebar .sidebar-procurement-link:hover {
+  background: rgba(31, 79, 191, 0.3);
+  color: #fff;
+}
+
+.app-sidebar .sidebar-procurement-link.active {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
+  font-weight: 600;
+}
+
+.app-sidebar .sidebar-procurement-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar .sidebar-procurement-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.app-sidebar .sidebar-procurement-marker.marker-pipeline {
+  background: #38bdf8;
+}
+
+.app-sidebar .sidebar-procurement-marker.marker-po {
+  background: #34d399;
+}
+
+.app-sidebar .sidebar-procurement-marker.marker-invoice {
+  background: #f59e0b;
+}
+
+.app-sidebar .sidebar-procurement-marker.marker-new {
+  background: #f87171;
+}
+
+/* ===== Procurement pipeline view ===== */
+.procurement-step-card .procurement-step-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 64, 175, 0.1);
+  color: #1e40af;
+  font-size: 1rem;
+}
+
+
+/* ===== Vendor contract drawer ===== */
+.contract-drawer-page {
+  display: flex;
+  justify-content: flex-end;
+  min-height: calc(100vh - 10rem);
+  background: #f8f9fa;
+  padding: 0.25rem;
+}
+
+.contract-drawer-panel {
+  width: min(900px, 100%);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: #111827;
+  overflow: hidden;
+}
+
+.contract-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.contract-drawer-ref-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.contract-drawer-ref {
+  margin-top: 0.2rem;
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95rem;
+  color: #f97316;
+  font-weight: 600;
+}
+
+.contract-drawer-body {
+  padding: 1.2rem 1.5rem 1.4rem;
+  background: #f8f9fa;
+}
+
+.contract-section + .contract-section {
+  margin-top: 1.15rem;
+}
+
+.contract-section {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+.contract-section-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.contract-drawer-panel .form-label {
+  color: #374151;
+}
+
+.contract-drawer-panel .form-control,
+.contract-drawer-panel .form-select,
+.contract-drawer-panel .input-group-text {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  border-radius: 8px;
+}
+
+.contract-drawer-panel .form-control:focus,
+.contract-drawer-panel .form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+.contract-drawer-panel .form-select option {
+  color: #111827;
+}
+
+.contract-ref-input {
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #f97316 !important;
+  font-weight: 600;
+}
+
+.contract-drawer-panel .form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.contract-drawer-actions {
+  margin-top: 1.4rem;
+  display: flex;
+  gap: 0.6rem;
 }
